@@ -1,0 +1,41 @@
+criado projeto com laravel new mypet
+em api foi criado uma rota de teste:
+Route::get('/ping', function(){
+    return ['pong' =>true];
+});
+
+usado o https://resttesttest.com/ para testar a api
+
+instalação de bibliotecas para api
+BIBLIOTECA DE TOKEN
+jwt-auth
+-> composer require tymon/jwt-auth:*
+-> php artisan vendor:publish --provider="Tymon\JWTAuth\Providers\LaravelServiceProvider"
+-> php artisan jwt:secret
+
+BIBLIOTECA DE IMAGEM
+intervention image
+-> composer require intervention/image
+para usar com laravel:
+config/app.php
+$providers
+    intervention\Image\ImageServiceProvider::class
+$aliases
+    'Image' =>Intervention\Image\Facades\Image::class
+
+CRIAÇÃO DE MIGRATIONS
+php artisan make:migration create_all_tables
+
+TRATATIVA DE DATAS
+carbon
+-> composer require nesbot/carbon
+
+VALIDADOR DE ENTRADAS (CEP, TELEFONE...)
+composer require laravellegends/pt-br-validator
+SOBRE:https://github.com/LaravelLegends/pt-br-validator
+
+
+LOGIN COM react-router-dom e axios
+
+
+https://packagist.org/packages/tymon/jwt-auth

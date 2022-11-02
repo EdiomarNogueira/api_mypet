@@ -1,0 +1,37 @@
+- Planejamento dos ENDPOINTS
+* sem login
+
+POST *api/auth/login (email, password)
+POST api/auth/logout
+POST api/auth/refresh
+
+POST *api/usuario (nome, email, senha, data_nascimento, categoria)
+PUT api/usuario (nome, email, senha, data_nascimento , categoria, telefone, instagram, facebook, biografia, sexo, cidade, cep, trabalho)
+POST api/usuario/avatar (avatar)
+POST api/usuario/capa (capa)
+
+GET api/feed (pagina)
+GET api/usuario/feed (pagina)
+
+POST api/feed (type=text/photo, post, foto)
+GET api/usuario/123/feed (pagina)
+
+POST api/post/123/like
+POST api/post/123/comment (txt)
+POST api/post/123/comment/123/posicao_pet (cep)
+
+POST api/usuario/123/pet (nome, especie, biografia, data_nascimento, sexo, porte, pelagem, situacao)
+PUT api/usuario/123/pet/123 (nome, especie, biografia, data_nascimento, sexo, porte, pelagem, situacao)
+GET api/usuario/123/pet/123
+POST api/usuario/123/pet/123/cartao_vacinas
+GET api/usuario/123/pet/123/cartao_vacinas
+POST api/usuario/123/pet/123/rga
+GET api/usuario/123/pet/123/rga
+
+GET api/usuario //pegar
+GET api/usuario/123
+
+GET api/search (txt)
+
+- Criação do projeto
+- Instalação de bibliotecas

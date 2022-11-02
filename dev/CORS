@@ -1,0 +1,7 @@
+CORS = Cross-origin Resource Sharing
+
+-Permissão de Endereço(origem)
+-Permissão de Método(Verbo)
+-Permissão de Cabeçalho(Headers)
+
+//config -> cors
