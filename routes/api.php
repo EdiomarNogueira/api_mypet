@@ -48,7 +48,9 @@ Route::get('/unauthenticated', function() {
 })->name('login');
 
 //AUTENTICAÇÃO
-Route::post('/user', [AuthController::class, 'create']); //CRIAR USUÁRIO
+Route::get('/', [AuthController::class, '']); //BUSCAR USUÁRIO LOGADO
+
+Route::post('/user/user_register', [AuthController::class, 'create']); //CRIAR USUÁRIO
 Route::post('/auth/login', [AuthController::class, 'login']); //LOGAR USUÁRIO
 Route::post('/auth/refresh', [AuthController::class, 'refresh']);
 Route::post('/validate', [AuthController::class, 'validatetoken']);

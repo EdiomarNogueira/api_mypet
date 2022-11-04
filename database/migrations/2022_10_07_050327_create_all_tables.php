@@ -89,6 +89,7 @@ return new class extends Migration
             $table->charset = 'utf8mb4';
             $table->collation = 'utf8mb4_unicode_ci';
             $table->id();
+            $table->integer('situation')->default('0'); //0-> Post normal, 1->Pet perdido, 2 ->Pet encontrado, 3->Pet em tratamento, 4->Situação resolvida
             $table->integer('id_user');
             $table->string('type', 20);
             $table->text('body');

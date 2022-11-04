@@ -53,6 +53,7 @@ class PostController extends Controller
             $array['error'] = 'Post não existe!';
             return $array;
         }
+        return $array;
     }
 
     public function comment(Request $request, $id)

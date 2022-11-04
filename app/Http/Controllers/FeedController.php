@@ -108,6 +108,7 @@ class FeedController extends Controller
         //2 - Pegar os posts ordenado pela data
         $postList = Post::whereIn('id_user', $users)
         ->where('status', 1)
+        ->where('situation', 0)
         ->orderBy('date_register', 'desc')
         ->offset($page * $perPage)
         ->limit($perPage)
@@ -161,8 +162,8 @@ class FeedController extends Controller
             $comments = Post_Comment::where('id_post', $postItem['id'])->get();
             foreach($comments as $commentsKey => $comment) {
                 $user = User::find($comment['id_user']);
-                $user['avatar'] = url('media/avatars_users'.$user['avatar']);
-                $user['cover'] = url('media/covers_users'.$user['cover']);
+                $user['avatar'] = url('media/avatars_users/'.$user['avatar']);
+                $user['cover'] = url('media/covers_users/'.$user['cover']);
                 $comments[$commentsKey]['user'] = $user;
             }
             $postList[$postKey]['comments'] = $comments;
