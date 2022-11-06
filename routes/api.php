@@ -76,6 +76,7 @@ Route::middleware('auth:api')->get('/user/{id}/followers', [UserController::clas
 Route::middleware('auth:api')->post('/feed', [FeedController::class, 'create']); //CRIAR POST AO FEED
 Route::middleware('auth:api')->get('/feed', [FeedController::class, 'read']); //LER POSTS DO FEED
 Route::middleware('auth:api')->get('/user/feed', [FeedController::class, 'userFeed']); //VER POSTS DO USUÁRIO LOGADO
+Route::middleware('auth:api')->get('/feed/post/{id}/likes', [FeedController::class, 'readLikes']); //LER POSTS DO FEED
 Route::middleware('auth:api')->get('/user/{id}/feed', [FeedController::class, 'userFeed']); //VER POSTS DE USUÁRIO ESPECIFICO
 Route::middleware('auth:api')->get('/user/{id}/photos', [FeedController::class, 'userPhotos']);  //VER POSTAGENS COM FOTOS
 // FALTA SEPARAR O FEED ENTRE POSTS "NORMAIS" E POSTS QUE SERÃO INTERPRETADOS COMO ALERTA, DE ACORDO COM UMA TAG A SER CRIADA
