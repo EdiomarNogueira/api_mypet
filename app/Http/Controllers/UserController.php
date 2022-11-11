@@ -22,40 +22,12 @@ class UserController extends Controller
         $this->loggedUser = auth()->user();
     }
 
-    public function location()
-    {
-        //https://emersonbroga.com/pegar-coodenadas-geograficas-a-partir-de-um-endereco/
-        $address = 'Praça Sete de Setembro - Belo Horizonte Minas Gerais ';
-        $lat = null;
-        $lng = null;
-        $stream_opts = [
-            "ssl" => [
-                "verify_peer" => false,
-                "verify_peer_name" => false,
-            ]
-        ];
-        $json = file_get_contents("https://maps.google.com/map...®ion=$address&key=XXXXXXXXXXXXXXXX", false, stream_context_create($stream_opts));
-        $xml = simplexml_load_file($json) or die("url not loading");
-        $status = $xml->Response->Status->code;
-        if (strcmp($status, "200") == 0) {
-            // Successful geocode
-            $coordinates = $xml->Response->Placemark->Point->coordinates;
-            $coordinatesSplit = preg_split(",", $coordinates);
-            // Format: Longitude, Latitude, Altitude
-            $lat = $coordinatesSplit[1];
-            $lng = $coordinatesSplit[0];
-        }
-        $array['latitude'] = $lat;
-        $array['longitude'] = $lng;
-        return $array;
-    }
+
 
 
     public function update(Request $request)
     {
         $array = ['error' => ''];
-        $latitude = $this->location();
-        var_dump($latitude);
         $name = $request->input('name');
         $email = $request->input('email');
         $password = $request->input('password');
@@ -66,8 +38,7 @@ class UserController extends Controller
         $biography = $request->input('biography');
         $cep = $request->input('cep');
         $city = $request->input('city');
-        // $latitude = $request->input('latitude');
-
+        $latitude = $request->input('latitude');
         $longitude = $request->input('longitude');
         $facebook = $request->input('facebook');
         $instagram = $request->input('instagram');

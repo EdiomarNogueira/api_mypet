@@ -104,6 +104,7 @@ class FeedController extends Controller
         foreach ($userList as $userItem) {
             $users[] = $userItem['user_to'];
         }
+
         $users[] = $this->loggedUser['id'];
         //2 - Pegar os posts ordenado pela data
         $postList = Post::whereIn('id_user', $users)
@@ -136,7 +137,7 @@ class FeedController extends Controller
     public function readLikes($id)
     {
         $array = ['error' => ''];
-       // $id_post = intval($request->input('id_post'));
+        // $id_post = intval($request->input('id_post'));
 
         $likes = Post_Like::where('id_post', $id)
             ->where('status', 1)
@@ -144,8 +145,8 @@ class FeedController extends Controller
 
         $array['liked'] = false;
 
-        foreach($likes as $key => $like) {
-            if($like->id_user == $this->loggedUser['id'] ) {
+        foreach ($likes as $key => $like) {
+            if ($like->id_user == $this->loggedUser['id']) {
                 $array['liked'] = true;
                 break;
             }

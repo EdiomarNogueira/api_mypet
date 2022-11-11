@@ -33,7 +33,8 @@ return new class extends Migration
             $table->string('latitude', 20)->nullable();
             $table->string('longitude', 20)->nullable();
             $table->string('work', 100)->nullable();
-            $table->string('cep',10)->nullable();
+            $table->string('rua',200)->nullable();
+            $table->string('bairro',200)->nullable();
             $table->string('avatar',100)->default('default.jpg');
             $table->string('cover',100)->default('cover.jpg');
             $table->string('token', 200)->nullable();
@@ -150,7 +151,9 @@ return new class extends Migration
             $table->integer('id_pet');
             $table->integer('id_post');
             $table->integer('id_post_comment');
-            $table->string('cep');
+            $table->string('rua');
+            $table->string('bairro');
+            $table->string('cidade');
             $table->integer('status')->default('1'); // 1 -> Ativo, 2 -> Desativado
             $table->dateTime('date_register');
             $table->dateTime('date_change')->nullable();

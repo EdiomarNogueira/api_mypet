@@ -14,9 +14,9 @@
         "laravel/tinker": "^2.7",
         "laravellegends/pt-br-validator": "^9.1",
         "lcobucci/jwt": "^4.0",
-        "nesbot/carbon": "^2.62",
+        "nesbot/carbon": "^2.63",
         "php-util/autoload-search": "dev-master",
-        "tymon/jwt-auth": "dev-develop"
+        "tymon/jwt-auth": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",
