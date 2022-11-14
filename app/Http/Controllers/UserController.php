@@ -208,6 +208,7 @@ class UserController extends Controller
                 $user->save();
 
                 $array['url'] = url('/media/avatars_users/' . $filename);
+                $array['success'] = "Avatar atualizado com sucesso!";
             } else {
                 $array['error'] = 'Arquivo não suportado!';
                 return $array;

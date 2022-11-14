@@ -111,10 +111,13 @@ class AuthController extends Controller
     {
         $array = ['error' => ''];
         $user = Auth::user();
+
         $array['id'] =$user->id;
         $array['name'] = $user->name;
         $array['phone'] = $user->phone;
         $array['email'] = $user->email;
+        $array['latitude'] = $user->latitude;
+        $array['longitude'] = $user->longitude;
         $array['avatar'] = url('media/avatars_users/' . $user->avatar);
         return $array;
     }

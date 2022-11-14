@@ -35,7 +35,14 @@ class PetController extends Controller
         $size = $request->input('size');
         $fur = $request->input('fur');
         $situation = $request->input('situation');
+        $latitude = $request->input('latitude');
+        $longitude =$request->input('longitude');
 
+        if($species == 1) { //1 - cachorro, 2- gato
+            $avatar = "dog_default.jpg";
+        } else if($species == 2) {
+            $avatar = "cat_default.jpg";
+        }
         // CRIANDO NOVO PET
         $newPet = new Pet();
         $newPet->name = $name;
@@ -44,9 +51,12 @@ class PetController extends Controller
         $newPet->birthdate = $birthdate;
         $newPet->biography = $biography;
         $newPet->genre = $genre;
+        $newPet->avatar = $avatar;
         $newPet->size = $size;
         $newPet->fur = $fur;
         $newPet->situation = $situation;
+        $newPet->latitude = $latitude;
+        $newPet->longitude = $longitude;
         $newPet->date_register = date('Y-m-d H:i:s');
         $newPet->save();
 
@@ -274,6 +284,7 @@ class PetController extends Controller
         } else {
             $pets[] = $id_pet;
         }
+        $perPage = intval($request->input('perPage'));
 
         $page = intval($request->input('page'));
         $perPage = 4;
@@ -302,6 +313,7 @@ class PetController extends Controller
 
         $array['total'] = $total;
         $array['currentPet'] = $dados;
+        $array['perPage'] = $perPage;
         $array['pageCount'] = $pageCount;
 
         return $array;

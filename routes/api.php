@@ -62,10 +62,10 @@ Route::middleware('auth:api')->post('/user/avatar', [UserController::class, 'upd
 Route::middleware('auth:api')->post('/user/cover', [UserController::class, 'updateCover']); //ATUALIZAR BACKGROUND DO PERFIL
 Route::middleware('auth:api')->get('/user', [UserController::class, 'read']); //LER DADOS DO USUÁRIO
 //OBTER DADOS DE PET CADASTRADO
+Route::middleware('auth:api')->get('/user/pet', [PetController::class, 'readMePet']); //VER TODOS PETS DE USUÁRIO LOGADO ->adicionar avatar
 Route::middleware('auth:api')->get('/user/{id}/pet', [PetController::class, 'readUserPet']); //VER PET ESPECIFICO DE USUÁRIO ESPECIFICO -> adicionar avatar e cover
 Route::middleware('auth:api')->get('/user/pet/{id_pet}', [PetController::class, 'readMePet']); //VER PET ESPECIFICO DE USUÁRIO LOGADO -> adicionar avatar e cover
 Route::middleware('auth:api')->get('/user/{id}/pet/{id_pet}', [PetController::class, 'readUserPet']); //VER PET ESPECIFICO DE USUÁRIO ESPECIFICO -> adicionar avatar e cover
-Route::middleware('auth:api')->get('/user/pet', [PetController::class, 'readMePet']); //VER TODOS PETS DE USUÁRIO LOGADO ->adicionar avatar
 //FEED
 Route::middleware('auth:api')->get('/user/photos', [FeedController::class, 'userPhotos']); //VER FOGOS DO USUÁRIO
 //USUÁRIO

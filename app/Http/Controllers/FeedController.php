@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use App\Models\User_Relation;
 use App\Models\Post;
+use App\Models\Pet;
 use App\Models\Post_Like;
 use App\Models\Post_Comment;
 use Intervention\Image\Facades\Image;
@@ -32,6 +33,8 @@ class FeedController extends Controller
         $body = $request->input('body');
         $photo = $request->file('photo');
         $subtitle = $request->input('subtitle');
+        $pets = json_encode($request->input('pets'));
+
         if ($type) {
             switch ($type) {
                 case 'text':
@@ -78,7 +81,7 @@ class FeedController extends Controller
                 $newPost->type = $type;
                 $newPost->date_register = date('Y-m-d H:i:s');
                 $newPost->body = $body;
-
+                $newPost->marked_pets = $pets;
                 if ($newPost->type == 'photo') {
                     $newPost->subtitle = $subtitle;
                 }
@@ -97,7 +100,6 @@ class FeedController extends Controller
         $array = ['error' => ''];
         $page = 1;
         $perPage = intval($request->input('perPage'));
-
         //1 - Pegar lista de usuários que EU sigo (incluindo eu mesmo)
         $users = [];
         $userList = User_Relation::Where('user_from', $this->loggedUser['id'])->get();
@@ -115,12 +117,6 @@ class FeedController extends Controller
             ->limit($perPage)
             ->get();
 
-        foreach ($postList as $postKey => $postItem) {
-            if ($postItem['type'] == 'photo') {
-                $postItem['body'] = url('media/uploads/' . $postItem['body']);
-            }
-        }
-
         $total = Post::whereIn('id_user', $users)->count();
         $pageCount = ceil($perPage);
 
@@ -130,7 +126,6 @@ class FeedController extends Controller
         $array['posts'] = $posts;
         $array['pageCount'] = $pageCount;
         $array['currentPage'] = $page;
-
         return $posts;
     }
 
@@ -160,7 +155,10 @@ class FeedController extends Controller
     private function _postListToObject($postList, $loggedId)
     {
 
+
+
         foreach ($postList as $postKey => $postItem) {
+
             //VERIFICA SE O POST É MEU
             if ($postItem['id_user'] == $loggedId) {
                 $postList[$postKey]['mine'] = true;
@@ -192,7 +190,32 @@ class FeedController extends Controller
                 $comments[$commentsKey]['user'] = $user;
             }
             $postList[$postKey]['comments'] = $comments;
+
+
+            if ($postItem['type'] == 'photo') {
+                $postItem['body'] = url('media/uploads/' . $postItem['body']);
+            }
+
+            if ($postItem['marked_pets']) {
+                //var_dump('item', $postItem->marked_pets);
+                $array_pets = json_decode($postItem->marked_pets);
+                $postList[$postKey]['marked_pets'] = [];
+                $name_pets = [];
+                foreach ($array_pets as $key => $pets_id) {
+                    if ($pets_id != null) {
+
+
+                        $pet_marked = Pet::select('name')
+                            ->where('id', $pets_id)
+                            ->where('status', 1)
+                            ->get();
+                        $name_pets[$key] = $pet_marked[0]->name;
+                    }
+                }
+                $postList[$postKey]['marked_pets'] = $name_pets;
+            }
         }
+
         return $postList;
     }
 

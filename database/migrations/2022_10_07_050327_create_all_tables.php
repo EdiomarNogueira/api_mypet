@@ -33,15 +33,14 @@ return new class extends Migration
             $table->string('latitude', 20)->nullable();
             $table->string('longitude', 20)->nullable();
             $table->string('work', 100)->nullable();
-            $table->string('rua',200)->nullable();
-            $table->string('bairro',200)->nullable();
-            $table->string('avatar',100)->default('default.jpg');
-            $table->string('cover',100)->default('cover.jpg');
+            $table->string('rua', 200)->nullable();
+            $table->string('bairro', 200)->nullable();
+            $table->string('avatar', 100)->default('default.jpg');
+            $table->string('cover', 100)->default('cover.jpg');
             $table->string('token', 200)->nullable();
             $table->integer('status')->default('1'); // 1 -> Ativo, 2 -> Desativado
             $table->dateTime('date_register');
             $table->dateTime('date_change')->nullable();
-
         });
 
         Schema::create('user_relations', function (Blueprint $table) {
@@ -53,7 +52,6 @@ return new class extends Migration
             $table->integer('status')->default('1'); // 1 -> Ativo, 2 -> Desativado
             $table->dateTime('date_register');
             $table->dateTime('date_change')->nullable();
-
         });
 
         Schema::create('pets', function (Blueprint $table) {
@@ -65,9 +63,11 @@ return new class extends Migration
             $table->string('species');
             $table->string('biography', 240)->nullable();
             $table->date('birthdate');
-            $table->string('avatar',100)->default('default_pet.jpg');
-            $table->string('cover',100)->default('cover_pet.jpg');
+            $table->string('avatar', 100)->default('default_pet.jpg');
+            $table->string('cover', 100)->default('cover_pet.jpg');
             $table->integer('genre')->nullable();
+            $table->string('latitude', 20)->nullable();
+            $table->string('longitude', 20)->nullable();
             $table->integer('size')->nullable();
             $table->integer('fur')->nullable();
             $table->integer('situation')->nullable();
@@ -92,6 +92,7 @@ return new class extends Migration
             $table->id();
             $table->integer('situation')->default('0'); //0-> Post normal, 1->Pet perdido, 2 ->Pet encontrado, 3->Pet em tratamento, 4->Situação resolvida
             $table->integer('id_user');
+            $table->json('marked_pets');
             $table->string('type', 20);
             $table->text('body');
             $table->text('subtitle', 240)->nullable();
@@ -177,6 +178,5 @@ return new class extends Migration
         Schema::dropIfExists('vaccines_card');
         Schema::dropIfExists('rga');
         Schema::dropIfExists('location_pet');
-
     }
 };
