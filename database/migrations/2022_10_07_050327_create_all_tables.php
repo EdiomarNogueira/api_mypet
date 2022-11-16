@@ -63,8 +63,9 @@ return new class extends Migration
             $table->string('species');
             $table->string('biography', 240)->nullable();
             $table->date('birthdate');
+            $table->integer('castrated')->nullable();
             $table->string('avatar', 100)->default('default_pet.jpg');
-            $table->string('cover', 100)->default('cover_pet.jpg');
+            $table->string('cover', 100)->default('default_cover_pet.jpg');
             $table->integer('genre')->nullable();
             $table->string('latitude', 20)->nullable();
             $table->string('longitude', 20)->nullable();

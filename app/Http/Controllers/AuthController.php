@@ -118,6 +118,7 @@ class AuthController extends Controller
         $array['email'] = $user->email;
         $array['latitude'] = $user->latitude;
         $array['longitude'] = $user->longitude;
+        $array['category'] = $user->category;
         $array['avatar'] = url('media/avatars_users/' . $user->avatar);
         return $array;
     }

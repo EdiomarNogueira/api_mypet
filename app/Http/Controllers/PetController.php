@@ -3,10 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use App\Models\Pet;
+use DateTime;
 use Intervention\Image\Facades\Image;
 
 class PetController extends Controller
@@ -34,13 +33,14 @@ class PetController extends Controller
         $genre = $request->input('genre');
         $size = $request->input('size');
         $fur = $request->input('fur');
+        $castrated = $request->input('castrated');
         $situation = $request->input('situation');
         $latitude = $request->input('latitude');
-        $longitude =$request->input('longitude');
+        $longitude = $request->input('longitude');
 
-        if($species == 1) { //1 - cachorro, 2- gato
+        if ($species == 1) { //1 - cachorro, 2- gato
             $avatar = "dog_default.jpg";
-        } else if($species == 2) {
+        } else if ($species == 2) {
             $avatar = "cat_default.jpg";
         }
         // CRIANDO NOVO PET
@@ -54,6 +54,7 @@ class PetController extends Controller
         $newPet->avatar = $avatar;
         $newPet->size = $size;
         $newPet->fur = $fur;
+        $newPet->castrated = $castrated;
         $newPet->situation = $situation;
         $newPet->latitude = $latitude;
         $newPet->longitude = $longitude;
@@ -81,6 +82,7 @@ class PetController extends Controller
             $biography = $request->input('biography');
             $genre = $request->input('genre');
             $size = $request->input('size');
+            $castrated = $request->input('castrated');
             $fur = $request->input('fur');
             $situation = $request->input('situation');
             $date_change = date('Y-m-d H:i:s');
@@ -122,6 +124,10 @@ class PetController extends Controller
 
             if ($situation) {
                 $pet->situation = $situation;
+            }
+
+            if ($castrated) {
+                $pet->castrated = $castrated;
             }
 
             $pet->save();
@@ -253,6 +259,7 @@ class PetController extends Controller
         $pageCount = ceil($total / $perPage);
 
         foreach ($dados as $key => $dado) {
+
             $dados[$key][0]->avatar = url('media/avatars_pets/' . $dados[$key][0]->avatar);
             $dados[$key][0]->cover = url('media/avatars_pets/' . $dados[$key][0]->cover);
         }
@@ -289,30 +296,54 @@ class PetController extends Controller
         $page = intval($request->input('page'));
         $perPage = 4;
 
-        foreach ($pets as $key => $pet) {
-            $dados[] = Pet::selectRaw('*')
-                ->where('id', $pet)
-                ->where('id_user', $id_user)
-                ->offset($page * $perPage)
-                ->limit($perPage)
-                ->where('status', 1)
-                ->get();
-            if (count($dados[0]) == 0) {
-                $array['error'] = 'Pet não encontrado';
-                return $array;
-            }
+        $dados[] = Pet::select('*')
+            ->whereIn('id', $pets)
+            ->where('id_user', $id_user)
+            // ->offset($page * $perPage)
+            // ->limit($perPage)
+            ->where('status', 1)
+            ->get();
+        if (count($dados) == 0) {
+            $array['error'] = 'Pet não encontrado';
+            return $array;
         }
+
 
         $total = count($dados);
         $pageCount = ceil($total / $perPage);
 
-        foreach ($dados as $key => $dado) {
-            $dados[$key][0]->avatar = url('media/avatars_pets/' . $dados[$key][0]->avatar);
-            $dados[$key][0]->cover = url('media/avatars_pets/' . $dados[$key][0]->cover);
+        foreach ($dados[0] as $key => $dado) {
+
+            $dados[0][$key]->avatar = url('media/avatars_pets/' .  $dados[0][$key]->avatar);
+            $dados[0][$key]->cover = url('media/covers_pets/' .   $dados[0][$key]->cover);
+
+            if ($dados[0][$key]->birthdate != null) {
+
+                $data_atual = new DateTime();
+                $nascimento = new DateTime($dados[0][$key]->birthdate);
+                $intervalo = $nascimento->diff($data_atual);
+                if ($intervalo->y > 0 && $intervalo->m > 0) {
+                    $dados[0][$key]->age = $intervalo->y . " anos " . $intervalo->m . " meses ";
+                } else if ($intervalo->y > 0) {
+                    $dados[0][$key]->age = $intervalo->y . " anos ";
+                } else if ($intervalo->m > 0) {
+                    $dados[0][$key]->age = $intervalo->m . " meses ";
+                } else {
+                    $dados[0][$key]->age =  $intervalo->d . " dias";
+                }
+
+                $name_tutor =  User::select('name')
+                    ->where('id', $dados[0][$key]->id_user)
+                    // ->offset($page * $perPage)
+                    // ->limit($perPage)
+                    ->where('status', 1)
+                    ->first();
+                $dados[0][$key]->tutor_name = $name_tutor->name;
+            }
         }
 
         $array['total'] = $total;
-        $array['currentPet'] = $dados;
+        $array['currentPet'] = $dados[0];
         $array['perPage'] = $perPage;
         $array['pageCount'] = $pageCount;
 
