@@ -251,6 +251,56 @@ class FeedController extends Controller
         return $array;
     }
 
+
+    public function userPhotosPet(Request $request, $id = false, $id_pet = false)
+    {
+        $array = ['error' => ''];
+
+        if ($id == false) {
+            $id = $this->loggedUser['id'];
+        }
+
+        $page = 1;
+        $perPage = intval($request->input('perPage'));
+
+        // Pegar as fotos do usuário ordenado pela data
+        if ($id_pet) {
+            $postList = Post::where('id_user', $id)
+                ->where('type', 'photo')
+                ->whereJsonContains('marked_pets', $id_pet)
+                ->orderBy('date_register', 'desc')
+                //->offset($page * $perPage)
+                ->limit($perPage)
+                ->get();
+        } else {
+            $postList = Post::where('id_user', $id)
+                ->where('type', 'photo')
+                ->orderBy('date_register', 'desc')
+                ->offset($page * $perPage)
+                ->limit($perPage)
+                ->get();
+        }
+
+
+        // $total = Post::where('id_user', $id)
+        //     ->where('type', 'photo')
+        //     ->count();
+        // $pageCount = ceil($total / $perPage);
+
+        // Preencher as informações adicionais
+        $posts = $this->_postListToObject($postList, $this->loggedUser['id']);
+
+        // foreach ($posts as $pkey => $post) {
+        //     $posts[$pkey]['body'] = url('media/uploads/' . $posts[$pkey]['body']);
+        // }
+
+        $array['posts'] = $posts;
+        //$array['pageCount'] = $pageCount;
+        $array['currentPage'] = $page;
+
+        return $array;
+    }
+
     public function userPhotos(Request $request, $id = false)
     {
         $array = ['error' => ''];

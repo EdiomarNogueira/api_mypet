@@ -62,12 +62,17 @@ Route::middleware('auth:api')->post('/user/avatar', [UserController::class, 'upd
 Route::middleware('auth:api')->post('/user/cover', [UserController::class, 'updateCover']); //ATUALIZAR BACKGROUND DO PERFIL
 Route::middleware('auth:api')->get('/user', [UserController::class, 'read']); //LER DADOS DO USUÁRIO
 //OBTER DADOS DE PET CADASTRADO
+Route::middleware('auth:api')->get('/user/{id}/photos', [FeedController::class, 'userPhotos']);  //VER POSTAGENS COM FOTOS
+Route::middleware('auth:api')->get('/user/{id}/photos/pet/{id_pet}', [FeedController::class, 'userPhotosPet']);  //VER POSTAGENS COM FOTOS COM PETS MARCADOS
+
+Route::middleware('auth:api')->get('/user/photos', [FeedController::class, 'userPhotos']); //VER FOGOS DO USUÁRIO
 Route::middleware('auth:api')->get('/user/pet', [PetController::class, 'readMePet']); //VER TODOS PETS DE USUÁRIO LOGADO ->adicionar avatar
+
 Route::middleware('auth:api')->get('/user/{id}/pet', [PetController::class, 'readUserPet']); //VER PET ESPECIFICO DE USUÁRIO ESPECIFICO -> adicionar avatar e cover
+
 Route::middleware('auth:api')->get('/user/pet/{id_pet}', [PetController::class, 'readMePet']); //VER PET ESPECIFICO DE USUÁRIO LOGADO -> adicionar avatar e cover
 Route::middleware('auth:api')->get('/user/{id}/pet/{id_pet}', [PetController::class, 'readUserPet']); //VER PET ESPECIFICO DE USUÁRIO ESPECIFICO -> adicionar avatar e cover
 //FEED
-Route::middleware('auth:api')->get('/user/photos', [FeedController::class, 'userPhotos']); //VER FOGOS DO USUÁRIO
 //USUÁRIO
 Route::middleware('auth:api')->get('/user/{id}', [UserController::class, 'read']); //VER DADOS DE USUÁRIO ESPECIFICO
 Route::middleware('auth:api')->post('/user/{id}/follow', [UserController::class, 'follow']); //SEGUIR OU DEIXAR DE SEGUIR USUÁRIO
@@ -78,7 +83,8 @@ Route::middleware('auth:api')->get('/feed', [FeedController::class, 'read']); //
 Route::middleware('auth:api')->get('/user/feed', [FeedController::class, 'userFeed']); //VER POSTS DO USUÁRIO LOGADO
 Route::middleware('auth:api')->get('/feed/post/{id}/likes', [FeedController::class, 'readLikes']); //LER POSTS DO FEED
 Route::middleware('auth:api')->get('/user/{id}/feed', [FeedController::class, 'userFeed']); //VER POSTS DE USUÁRIO ESPECIFICO
-Route::middleware('auth:api')->get('/user/{id}/photos', [FeedController::class, 'userPhotos']);  //VER POSTAGENS COM FOTOS
+
+
 // FALTA SEPARAR O FEED ENTRE POSTS "NORMAIS" E POSTS QUE SERÃO INTERPRETADOS COMO ALERTA, DE ACORDO COM UMA TAG A SER CRIADA
 // ASSIM SERÃO DOIS FEEDS PRINCIPAIS, DE POSTS NORMAIS E DE POSTS DE ALERTA
 // FALTA MEIO DE MARCAR OS PETS EM FOTOS, GERANDO GALERIA ESPECIFICA PARA CADA PET DE DONOS COM MAIS DE UM  PET

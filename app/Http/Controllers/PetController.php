@@ -239,7 +239,7 @@ class PetController extends Controller
         }
 
         $page = intval($request->input('page'));
-        $perPage = 4;
+        $perPage = 2;
 
         foreach ($pets as $key => $pet) {
             $dados[] = Pet::selectRaw('*')
