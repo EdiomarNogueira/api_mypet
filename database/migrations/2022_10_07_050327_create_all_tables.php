@@ -33,10 +33,10 @@ return new class extends Migration
             $table->string('latitude', 20)->nullable();
             $table->string('longitude', 20)->nullable();
             $table->string('work', 100)->nullable();
-            $table->string('rua', 200)->nullable();
-            $table->string('bairro', 200)->nullable();
-            $table->string('avatar', 100)->default('default.jpg');
-            $table->string('cover', 100)->default('cover.jpg');
+            $table->string('road', 200)->nullable();
+            $table->string('district', 200)->nullable();
+            $table->string('avatar', 100)->default('default_avatar_user.jpg');
+            $table->string('cover', 100)->default('default_cover_user.jpg');
             $table->string('token', 200)->nullable();
             $table->integer('status')->default('1'); // 1 -> Ativo, 2 -> Desativado
             $table->dateTime('date_register');
@@ -64,8 +64,8 @@ return new class extends Migration
             $table->string('biography', 240)->nullable();
             $table->date('birthdate');
             $table->integer('castrated')->nullable();
-            $table->string('avatar', 100)->default('default_pet.jpg');
-            $table->string('cover', 100)->default('default_cover_pet.jpg');
+            $table->string('avatar', 100);
+            $table->string('cover', 100);
             $table->integer('genre')->nullable();
             $table->string('latitude', 20)->nullable();
             $table->string('longitude', 20)->nullable();

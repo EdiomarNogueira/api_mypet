@@ -39,9 +39,9 @@ class PetController extends Controller
         $longitude = $request->input('longitude');
 
         if ($species == 1) { //1 - cachorro, 2- gato
-            $avatar = "dog_default.jpg";
+            $avatar = "dog_avatar_default.jpg";
         } else if ($species == 2) {
-            $avatar = "cat_default.jpg";
+            $avatar = "cat_avatar_default.jpg";
         }
         // CRIANDO NOVO PET
         $newPet = new Pet();

@@ -38,6 +38,8 @@ class UserController extends Controller
         $biography = $request->input('biography');
         $cep = $request->input('cep');
         $city = $request->input('city');
+        $road = $request->input('road');
+        $district = $request->input('district');
         $latitude = $request->input('latitude');
         $longitude = $request->input('longitude');
         $facebook = $request->input('facebook');
@@ -85,6 +87,16 @@ class UserController extends Controller
         if ($biography) {
             $user->biography = $biography;
         }
+
+        if ($road) {
+            $user->road = $road;
+        }
+
+        if ($district) {
+            $user->district = $district;
+        }
+
+
         //PASSWORD
         if ($password && $password_confirm) {
             if ($password === $password_confirm) {
