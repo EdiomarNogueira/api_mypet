@@ -20,8 +20,8 @@ use App\Http\Controllers\SearchController;
 |
 */
 
-Route::get('/ping', function(){
-    return ['pong' =>true];
+Route::get('/ping', function () {
+    return ['pong' => true];
 });
 
 // Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -43,7 +43,7 @@ Route::get('/ping', function(){
 
 // Route::get('/401', [AuthController::class, 'unauthorized'])->name('login');
 
-Route::get('/unauthenticated', function() {
+Route::get('/unauthenticated', function () {
     return ['error' => 'Usuario nao esta logado.'];
 })->name('login');
 
@@ -60,7 +60,10 @@ Route::middleware('auth:api')->get('/auth/me', [AuthController::class, 'me']); /
 Route::middleware('auth:api')->put('/user', [UserController::class, 'update']); //ATUALIZAR USUÁRIO
 Route::middleware('auth:api')->post('/user/avatar', [UserController::class, 'updateAvatar']); //ATUALIZAR AVATAR
 Route::middleware('auth:api')->post('/user/cover', [UserController::class, 'updateCover']); //ATUALIZAR BACKGROUND DO PERFIL
+Route::middleware('auth:api')->get('/user/recommended/{latitude}/{longitude}', [UserController::class, 'UsersRecommended']); //LER DADOS DO USUÁRIO
+
 Route::middleware('auth:api')->get('/user', [UserController::class, 'read']); //LER DADOS DO USUÁRIO
+
 //OBTER DADOS DE PET CADASTRADO
 Route::middleware('auth:api')->get('/user/{id}/photos', [FeedController::class, 'userPhotos']);  //VER POSTAGENS COM FOTOS
 Route::middleware('auth:api')->get('/user/{id}/photos/pet/{id_pet}', [FeedController::class, 'userPhotosPet']);  //VER POSTAGENS COM FOTOS COM PETS MARCADOS

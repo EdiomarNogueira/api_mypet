@@ -168,6 +168,40 @@ class UserController extends Controller
         return $array;
     }
 
+    public function UsersRecommended($latitude, $longitude)
+    {
+        $array = ['error' => ''];
+        $user = User::find($this->loggedUser['id']);
+        $lat = (float)($latitude);
+        $lon = (float)($longitude);
+        $list_seguidos = [];
+        $seguidos = User_Relation::where('user_from', $user->id)->get();
+        if ($seguidos) {
+            foreach ($seguidos as $key => $item) {
+                $list_seguidos[$key] = $item->user_to;
+            }
+        }
+        $array['seguidos'] = $list_seguidos;
+
+        $recommended = User::select(User::raw('*, SQRT(
+            POW(69.1 * (latitude - ' . $lat . '), 2) +
+            POW(69.1 * (' . $lon . ' - longitude) * COS(latitude / 57.3), 2))*1.6 AS distance'))
+            ->where('id', '!=', $user->id)
+            ->whereNotIn('id', $list_seguidos)
+            ->havingRaw('distance < ?', [5])
+            ->orderBy('distance', 'ASC')
+            ->get();
+
+            if($recommended) {
+                foreach($recommended as $key => $item) {
+                    $recommended[$key]->avatar = url('media/avatars_users/' . $recommended[$key]->avatar);
+                }
+            }
+        $array['recommended'] = $recommended;
+        return $array;
+    }
+
+
     public function updateCover(Request $request)
     {
         $array = ['error' => ''];
