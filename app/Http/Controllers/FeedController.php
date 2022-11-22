@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use App\Models\User_Relation;
 use App\Models\Post;
@@ -98,7 +96,7 @@ class FeedController extends Controller
     {
         //GET api/feed (page)
         $array = ['error' => ''];
-        $page = 1;
+        $page = 5;
         $perPage = intval($request->input('perPage'));
         //1 - Pegar lista de usuários que EU sigo (incluindo eu mesmo)
         $users = [];

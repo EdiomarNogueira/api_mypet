@@ -61,7 +61,7 @@ Route::middleware('auth:api')->put('/user', [UserController::class, 'update']); 
 Route::middleware('auth:api')->post('/user/avatar', [UserController::class, 'updateAvatar']); //ATUALIZAR AVATAR
 Route::middleware('auth:api')->post('/user/cover', [UserController::class, 'updateCover']); //ATUALIZAR BACKGROUND DO PERFIL
 Route::middleware('auth:api')->get('/user/recommended/{latitude}/{longitude}', [UserController::class, 'UsersRecommended']); //LER DADOS DO USUÁRIO
-
+Route::middleware('auth:api')->get('/user/friends/{latitude}/{longitude}', [UserController::class, 'UsersFriends']); //BUSCA AMIGOS DO USUÁRiO
 Route::middleware('auth:api')->get('/user', [UserController::class, 'read']); //LER DADOS DO USUÁRIO
 
 //OBTER DADOS DE PET CADASTRADO
@@ -79,6 +79,7 @@ Route::middleware('auth:api')->get('/user/{id}/pet/{id_pet}', [PetController::cl
 //USUÁRIO
 Route::middleware('auth:api')->get('/user/{id}', [UserController::class, 'read']); //VER DADOS DE USUÁRIO ESPECIFICO
 Route::middleware('auth:api')->post('/user/{id}/follow', [UserController::class, 'follow']); //SEGUIR OU DEIXAR DE SEGUIR USUÁRIO
+Route::middleware('auth:api')->get('/user/{id}/follow', [UserController::class, 'verificFollow']); //SEGUIR OU DEIXAR DE SEGUIR USUÁRIO
 Route::middleware('auth:api')->get('/user/{id}/followers', [UserController::class, 'followers']); //LISTA SEGUIDORES
 //FEED
 Route::middleware('auth:api')->post('/feed', [FeedController::class, 'create']); //CRIAR POST AO FEED

@@ -65,7 +65,7 @@ return new class extends Migration
             $table->date('birthdate');
             $table->integer('castrated')->nullable();
             $table->string('avatar', 100);
-            $table->string('cover', 100);
+            $table->string('cover', 100)->default('default_cover_pet.jpg');
             $table->integer('genre')->nullable();
             $table->string('latitude', 20)->nullable();
             $table->string('longitude', 20)->nullable();

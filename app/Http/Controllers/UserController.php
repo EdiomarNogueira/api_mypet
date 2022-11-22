@@ -168,6 +168,58 @@ class UserController extends Controller
         return $array;
     }
 
+    public function UsersFriends(Request $request, $latitude, $longitude)
+    {
+
+
+        $array = ['error' => ''];
+        $user = User::find($this->loggedUser['id']);
+        $lat = (float)($latitude);
+        $lon = (float)($longitude);
+        $page = 5;
+        $perPage = intval($request->input('perPage'));
+
+        $list_seguidos = [];
+        $list_seguidores = [];
+        $seguidos = User_Relation::where('user_from', $user->id)->get();
+        $seguidores = User_Relation::where('user_to', $user->id)->get();
+
+        if ($seguidos) {
+            foreach ($seguidos as $key => $item) {
+                $list_seguidos[$key] = $item->user_to;
+            }
+        }
+
+        if ($seguidores) {
+            foreach ($seguidores as $key => $item) {
+                $list_seguidores[$key] = $item->user_from;
+            }
+        }
+        $array['seguidos'] = $list_seguidos;
+        $array['seguidores'] = $list_seguidores;
+
+        $friends = User::select(User::raw('*, SQRT(
+            POW(69.1 * (latitude - ' . $lat . '), 2) +
+            POW(69.1 * (' . $lon . ' - longitude) * COS(latitude / 57.3), 2))*1.6 AS distance'))
+            ->where('id', '!=', $user->id)
+            ->whereIn('id', $list_seguidos)
+            ->whereIn('id', $list_seguidores)
+            ->havingRaw('distance < ?', [5])
+            ->orderBy('distance', 'ASC')
+            ->limit($perPage)
+            ->get();
+
+        if ($friends) {
+            foreach ($friends as $key => $item) {
+                $friends[$key]->avatar = url('media/avatars_users/' . $friends[$key]->avatar);
+            }
+        }
+        $array['friends'] = $friends;
+        $array['currentPage'] = $page;
+
+        return $array;
+    }
+
     public function UsersRecommended($latitude, $longitude)
     {
         $array = ['error' => ''];
@@ -192,11 +244,11 @@ class UserController extends Controller
             ->orderBy('distance', 'ASC')
             ->get();
 
-            if($recommended) {
-                foreach($recommended as $key => $item) {
-                    $recommended[$key]->avatar = url('media/avatars_users/' . $recommended[$key]->avatar);
-                }
+        if ($recommended) {
+            foreach ($recommended as $key => $item) {
+                $recommended[$key]->avatar = url('media/avatars_users/' . $recommended[$key]->avatar);
             }
+        }
         $array['recommended'] = $recommended;
         return $array;
     }
@@ -307,6 +359,21 @@ class UserController extends Controller
         return $array;
     }
 
+    public function verificFollow($id)
+    {
+        $array = ['error' => ''];
+        $user = User::find($this->loggedUser['id']);
+
+        $isFollower = User_Relation::where('user_from', $user->id)->where('user_to', $id)->get();
+        if($isFollower) {
+            $array['isFollower'] = true;
+        } else {
+            $array['isFollower'] = false;
+        }
+
+        return $array;
+    }
+
     public function follow($id)
     {
         $array = ['error' => ''];
@@ -324,12 +391,14 @@ class UserController extends Controller
 
             if ($relation) {
                 $relation->delete();
+                $array['relation'] = false;
             } else {
                 $newRelation = new User_Relation();
                 $newRelation->user_from = $this->loggedUser['id'];
                 $newRelation->user_to = $id;
                 $newRelation->date_register = date('Y-m-d H:i:s');
                 $newRelation->save();
+                $array['relation'] = true;
             }
         } else {
             $array['error'] = 'Usuário inexistente!';
