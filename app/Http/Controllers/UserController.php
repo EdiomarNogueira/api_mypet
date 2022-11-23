@@ -370,7 +370,6 @@ class UserController extends Controller
         } else {
             $array['isFollower'] = false;
         }
-
         return $array;
     }
 

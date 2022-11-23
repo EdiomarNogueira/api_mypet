@@ -199,18 +199,20 @@ class FeedController extends Controller
                 $array_pets = json_decode($postItem->marked_pets);
                 $postList[$postKey]['marked_pets'] = [];
                 $name_pets = [];
-                foreach ($array_pets as $key => $pets_id) {
-                    if ($pets_id != null) {
+                if ($array_pets) {
+                    foreach ($array_pets as $key => $pets_id) {
+                        if ($pets_id != null) {
 
 
-                        $pet_marked = Pet::select('name')
-                            ->where('id', $pets_id)
-                            ->where('status', 1)
-                            ->get();
-                        $name_pets[$key] = $pet_marked[0]->name;
+                            $pet_marked = Pet::select('name')
+                                ->where('id', $pets_id)
+                                ->where('status', 1)
+                                ->get();
+                            $name_pets[$key] = $pet_marked[0]->name;
+                        }
                     }
+                    $postList[$postKey]['marked_pets'] = $name_pets;
                 }
-                $postList[$postKey]['marked_pets'] = $name_pets;
             }
         }
 
@@ -279,13 +281,6 @@ class FeedController extends Controller
                 ->get();
         }
 
-
-        // $total = Post::where('id_user', $id)
-        //     ->where('type', 'photo')
-        //     ->count();
-        // $pageCount = ceil($total / $perPage);
-
-        // Preencher as informações adicionais
         $posts = $this->_postListToObject($postList, $this->loggedUser['id']);
 
         // foreach ($posts as $pkey => $post) {
@@ -307,14 +302,14 @@ class FeedController extends Controller
             $id = $this->loggedUser['id'];
         }
 
-        $page = intval($request->input('page'));
-        $perPage = 4;
+        $page = 1;
+        $perPage = intval($request->input('perPage'));
 
         // Pegar as fotos do usuário ordenado pela data
         $postList = Post::where('id_user', $id)
             ->where('type', 'photo')
             ->orderBy('date_register', 'desc')
-            ->offset($page * $perPage)
+            //->offset($page * $perPage)
             ->limit($perPage)
             ->get();
 
@@ -324,11 +319,11 @@ class FeedController extends Controller
         $pageCount = ceil($total / $perPage);
 
         // Preencher as informações adicionais
-        $posts = $this->_postListToObject($postList, $this->loggedUser['id']);
+        $posts = $this->_postListToObject($postList, $id);
 
-        foreach ($posts as $pkey => $post) {
-            $posts[$pkey]['body'] = url('media/uploads/' . $posts[$pkey]['body']);
-        }
+        // foreach ($posts as $pkey => $post) {
+        //     $posts[$pkey]['body'] = url('media/uploads/' . $posts[$pkey]['body']);
+        // }
 
         $array['posts'] = $posts;
         $array['pageCount'] = $pageCount;
