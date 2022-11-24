@@ -365,11 +365,12 @@ class UserController extends Controller
         $user = User::find($this->loggedUser['id']);
 
         $isFollower = User_Relation::where('user_from', $user->id)->where('user_to', $id)->get();
-        if($isFollower) {
+        if (count($isFollower) > 0) {
             $array['isFollower'] = true;
         } else {
             $array['isFollower'] = false;
         }
+
         return $array;
     }
 

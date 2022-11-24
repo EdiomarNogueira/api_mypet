@@ -241,31 +241,55 @@ class PetController extends Controller
         $page = intval($request->input('page'));
         $perPage = 2;
 
-        foreach ($pets as $key => $pet) {
-            $dados[] = Pet::selectRaw('*')
-                ->where('id_user', $id_user)
-                ->where('id', $pet)
-                ->offset($page * $perPage)
-                ->limit($perPage)
-                ->where('status', 1)
-                ->get();
-            if (count($dados[0]) == 0) {
-                $array['error'] = 'Pet não encontrado';
-                return $array;
+        // foreach ($pets as $key => $pet) {
+        $dados[] = Pet::selectRaw('*')
+            ->where('id_user', $id_user)
+            ->whereIn('id', $pets)
+            // ->where('id', $pet)
+            ->offset($page * $perPage)
+            ->limit($perPage)
+            ->where('status', 1)
+            ->get();
+        if (count($dados[0]) == 0) {
+            $array['error'] = 'Pet não encontrado';
+            return $array;
+        }
+
+        $total = count($dados[0]);
+        $pageCount = ceil($total / $perPage);
+
+        foreach ($dados[0] as $key => $dado) {
+
+            $dados[0][$key]->avatar = url('media/avatars_pets/' .  $dados[0][$key]->avatar);
+            $dados[0][$key]->cover = url('media/covers_pets/' .   $dados[0][$key]->cover);
+
+            if ($dados[0][$key]->birthdate != null) {
+
+                $data_atual = new DateTime();
+                $nascimento = new DateTime($dados[0][$key]->birthdate);
+                $intervalo = $nascimento->diff($data_atual);
+                if ($intervalo->y > 0 && $intervalo->m > 0) {
+                    $dados[0][$key]->age = $intervalo->y . " anos " . $intervalo->m . " meses ";
+                } else if ($intervalo->y > 0) {
+                    $dados[0][$key]->age = $intervalo->y . " anos ";
+                } else if ($intervalo->m > 0) {
+                    $dados[0][$key]->age = $intervalo->m . " meses ";
+                } else {
+                    $dados[0][$key]->age =  $intervalo->d . " dias";
+                }
+
+                $name_tutor =  User::select('name')
+                    ->where('id', $dados[0][$key]->id_user)
+                    // ->offset($page * $perPage)
+                    // ->limit($perPage)
+                    ->where('status', 1)
+                    ->first();
+                $dados[0][$key]->tutor_name = $name_tutor->name;
             }
         }
 
-        $total = count($dados);
-        $pageCount = ceil($total / $perPage);
-
-        foreach ($dados as $key => $dado) {
-
-            $dados[$key][0]->avatar = url('media/avatars_pets/' . $dados[$key][0]->avatar);
-            $dados[$key][0]->cover = url('media/avatars_pets/' . $dados[$key][0]->cover);
-        }
-
         $array['total'] = $total;
-        $array['currentPet'] = $dados;
+        $array['currentPet'] = $dados[0];
         $array['pageCount'] = $pageCount;
 
         return $array;
@@ -308,9 +332,9 @@ class PetController extends Controller
             return $array;
         }
 
-
         $total = count($dados);
         $pageCount = ceil($total / $perPage);
+
 
         foreach ($dados[0] as $key => $dado) {
 
