@@ -61,7 +61,7 @@ Route::middleware('auth:api')->put('/user', [UserController::class, 'update']); 
 Route::middleware('auth:api')->post('/user/avatar', [UserController::class, 'updateAvatar']); //ATUALIZAR AVATAR
 Route::middleware('auth:api')->post('/user/cover', [UserController::class, 'updateCover']); //ATUALIZAR BACKGROUND DO PERFIL
 Route::middleware('auth:api')->get('/user/recommended/{latitude}/{longitude}', [UserController::class, 'UsersRecommended']); //LER DADOS DO USUÁRIO
-Route::middleware('auth:api')->get('/user/friends/{latitude}/{longitude}', [UserController::class, 'UsersFriends']); //BUSCA AMIGOS DO USUÁRiO
+Route::middleware('auth:api')->get('/user/relations/{latitude}/{longitude}', [UserController::class, 'UsersRelations']); //BUSCA AMIGOS DO USUÁRiO
 Route::middleware('auth:api')->get('/user', [UserController::class, 'read']); //LER DADOS DO USUÁRIO
 
 //OBTER DADOS DE PET CADASTRADO

@@ -168,7 +168,7 @@ class UserController extends Controller
         return $array;
     }
 
-    public function UsersFriends(Request $request, $latitude, $longitude)
+    public function UsersRelations(Request $request, $latitude, $longitude)
     {
 
 
@@ -179,32 +179,49 @@ class UserController extends Controller
         $page = 5;
         $perPage = intval($request->input('perPage'));
 
-        $list_seguidos = [];
-        $list_seguidores = [];
-        $seguidos = User_Relation::where('user_from', $user->id)->get();
-        $seguidores = User_Relation::where('user_to', $user->id)->get();
+        $list_following = [];
+        $list_followers = [];
+        $following = User_Relation::where('user_from', $user->id)->get();
+        $followers = User_Relation::where('user_to', $user->id)->get();
 
-        if ($seguidos) {
-            foreach ($seguidos as $key => $item) {
-                $list_seguidos[$key] = $item->user_to;
+        if ($following) {
+            foreach ($following as $key => $item) {
+                $list_following[$key] = $item->user_to;
             }
         }
 
-        if ($seguidores) {
-            foreach ($seguidores as $key => $item) {
-                $list_seguidores[$key] = $item->user_from;
+        if ($followers) {
+            foreach ($followers as $key => $item) {
+                $list_followers[$key] = $item->user_from;
             }
         }
-        $array['seguidos'] = $list_seguidos;
-        $array['seguidores'] = $list_seguidores;
-
         $friends = User::select(User::raw('*, SQRT(
             POW(69.1 * (latitude - ' . $lat . '), 2) +
             POW(69.1 * (' . $lon . ' - longitude) * COS(latitude / 57.3), 2))*1.6 AS distance'))
             ->where('id', '!=', $user->id)
-            ->whereIn('id', $list_seguidos)
-            ->whereIn('id', $list_seguidores)
-            ->havingRaw('distance < ?', [5])
+            ->whereIn('id', $list_following)
+            ->whereIn('id', $list_followers)
+            // ->havingRaw('distance < ?', [5])
+            ->orderBy('distance', 'ASC')
+            ->limit($perPage)
+            ->get();
+
+        $following = User::select(User::raw('*, SQRT(
+                POW(69.1 * (latitude - ' . $lat . '), 2) +
+                POW(69.1 * (' . $lon . ' - longitude) * COS(latitude / 57.3), 2))*1.6 AS distance'))
+            ->where('id', '!=', $user->id)
+            ->whereIn('id', $list_following)
+            // ->havingRaw('distance < ?', [5])
+            ->orderBy('distance', 'ASC')
+            ->limit($perPage)
+            ->get();
+
+        $followers = User::select(User::raw('*, SQRT(
+                POW(69.1 * (latitude - ' . $lat . '), 2) +
+                POW(69.1 * (' . $lon . ' - longitude) * COS(latitude / 57.3), 2))*1.6 AS distance'))
+            ->where('id', '!=', $user->id)
+            ->whereIn('id', $list_followers)
+            // ->havingRaw('distance < ?', [5])
             ->orderBy('distance', 'ASC')
             ->limit($perPage)
             ->get();
@@ -214,6 +231,20 @@ class UserController extends Controller
                 $friends[$key]->avatar = url('media/avatars_users/' . $friends[$key]->avatar);
             }
         }
+
+        if ($following) {
+            foreach ($following as $key => $item) {
+                $following[$key]->avatar = url('media/avatars_users/' . $following[$key]->avatar);
+            }
+        }
+        if ($followers) {
+            foreach ($followers as $key => $item) {
+                $followers[$key]->avatar = url('media/avatars_users/' . $followers[$key]->avatar);
+            }
+        }
+
+        $array['following'] = $following;
+        $array['followers'] = $followers;
         $array['friends'] = $friends;
         $array['currentPage'] = $page;
 
