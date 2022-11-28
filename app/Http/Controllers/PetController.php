@@ -34,6 +34,7 @@ class PetController extends Controller
         $size = $request->input('size');
         $fur = $request->input('fur');
         $castrated = $request->input('castrated');
+        $breed = $request->input('breed');
         $situation = $request->input('situation');
         $latitude = $request->input('latitude');
         $longitude = $request->input('longitude');
@@ -53,6 +54,7 @@ class PetController extends Controller
         $newPet->genre = $genre;
         $newPet->avatar = $avatar;
         $newPet->size = $size;
+        $newPet->breed = $breed;
         $newPet->fur = $fur;
         $newPet->castrated = $castrated;
         $newPet->situation = $situation;
@@ -78,6 +80,7 @@ class PetController extends Controller
         if ($petUser > 0) {
             $name = $request->input('name');
             $species = $request->input('species');
+            $breed = $request->input('breed');
             $birthdate = $request->input('birthdate');
             $biography = $request->input('biography');
             $genre = $request->input('genre');
@@ -110,6 +113,10 @@ class PetController extends Controller
                 $pet->biography = $biography;
             }
 
+            if ($breed) {
+                $pet->breed = $breed;
+            }
+
             if ($genre) {
                 $pet->genre = $genre;
             }
@@ -129,7 +136,7 @@ class PetController extends Controller
             if ($castrated) {
                 $pet->castrated = $castrated;
             }
-
+            $pet->date_change = date('Y-m-d H:i:s');
             $pet->save();
             return $array['sucess'] = 'Alteração no Pet efetuada com sucesso!';
         } else {
@@ -167,6 +174,7 @@ class PetController extends Controller
                     $pet->save();
 
                     $array['url'] = url('/media/avatars_pets/' . $filename);
+                    $array['success'] = "Avatar atualizado com sucesso!";
                 } else {
                     $array['error'] = 'Arquivo não suportado!';
                     return $array;
@@ -176,6 +184,7 @@ class PetController extends Controller
                 return $array;
             }
         }
+        return $array;
     }
 
     public function updateCover(Request $request, $id_pet)
@@ -206,6 +215,7 @@ class PetController extends Controller
                     $pet->save();
 
                     $array['url'] = url('/media/covers_pets/' . $filename);
+                    $array['success'] = "Cover atualizado com sucesso!";
                 } else {
                     $array['error'] = 'Arquivo não suportado!';
                     return $array;
@@ -215,6 +225,7 @@ class PetController extends Controller
                 return $array;
             }
         }
+        return $array;
     }
 
     public function readUserPet(Request $request, $id_user, $ids_pets = null)

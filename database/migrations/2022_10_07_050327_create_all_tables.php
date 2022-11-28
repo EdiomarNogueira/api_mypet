@@ -61,6 +61,7 @@ return new class extends Migration
             $table->string('name', 100);
             $table->integer('id_user');
             $table->string('species');
+            $table->string('breed', 240)->nullable();
             $table->string('biography', 240)->nullable();
             $table->date('birthdate');
             $table->integer('castrated')->nullable();

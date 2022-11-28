@@ -168,12 +168,12 @@ class UserController extends Controller
         return $array;
     }
 
-    public function UsersRelations(Request $request, $latitude, $longitude)
+    public function UsersRelations(Request $request, $id_user, $latitude, $longitude)
     {
 
 
         $array = ['error' => ''];
-        $user = User::find($this->loggedUser['id']);
+        $user = User::find($id_user);
         $lat = (float)($latitude);
         $lon = (float)($longitude);
         $page = 5;
@@ -195,6 +195,14 @@ class UserController extends Controller
                 $list_followers[$key] = $item->user_from;
             }
         }
+
+        $list_friends = User::select('id')
+            ->where('id', '!=', $user->id)
+            ->whereIn('id', $list_following)
+            ->whereIn('id', $list_followers)
+            ->orderBy('id', 'ASC')
+            ->get();
+
         $friends = User::select(User::raw('*, SQRT(
             POW(69.1 * (latitude - ' . $lat . '), 2) +
             POW(69.1 * (' . $lon . ' - longitude) * COS(latitude / 57.3), 2))*1.6 AS distance'))
@@ -216,6 +224,7 @@ class UserController extends Controller
             ->limit($perPage)
             ->get();
 
+
         $followers = User::select(User::raw('*, SQRT(
                 POW(69.1 * (latitude - ' . $lat . '), 2) +
                 POW(69.1 * (' . $lon . ' - longitude) * COS(latitude / 57.3), 2))*1.6 AS distance'))
@@ -226,23 +235,34 @@ class UserController extends Controller
             ->limit($perPage)
             ->get();
 
+
         if ($friends) {
             foreach ($friends as $key => $item) {
                 $friends[$key]->avatar = url('media/avatars_users/' . $friends[$key]->avatar);
+                $friends[$key]->isFollowing = true;
             }
         }
 
         if ($following) {
             foreach ($following as $key => $item) {
                 $following[$key]->avatar = url('media/avatars_users/' . $following[$key]->avatar);
+                $following[$key]->isFollowing = true;
             }
         }
         if ($followers) {
             foreach ($followers as $key => $item) {
                 $followers[$key]->avatar = url('media/avatars_users/' . $followers[$key]->avatar);
+                if (in_array($followers[$key]->id, $list_following)) {
+                    $followers[$key]->isFollowing = true;
+                } else {
+                    $followers[$key]->isFollowing = false;
+                }
             }
         }
 
+        $array['qtnFriends'] =  count($list_friends);
+        $array['qtnFollowing'] =  count($list_following);
+        $array['qtnFollowers'] =  count($list_followers);
         $array['following'] = $following;
         $array['followers'] = $followers;
         $array['friends'] = $friends;
@@ -306,6 +326,7 @@ class UserController extends Controller
                 $user->save();
 
                 $array['url'] = url('/media/covers_users/' . $filename);
+                $array['success'] = "Cover atualizado com sucesso!";
             } else {
                 $array['error'] = 'Arquivo não suportado!';
                 return $array;
@@ -375,6 +396,33 @@ class UserController extends Controller
 
         $info['followers'] = User_Relation::where('user_to', $info['id'])->count();
         $info['following'] = User_Relation::where('user_from', $info['id'])->count();
+
+
+        //
+
+        $list_following = [];
+        $list_followers = [];
+        $following = User_Relation::where('user_from', $id)->get();
+        $followers = User_Relation::where('user_to', $id)->get();
+
+        if ($following) {
+            foreach ($following as $key => $item) {
+                $list_following[$key] = $item->user_to;
+            }
+        }
+
+        if ($followers) {
+            foreach ($followers as $key => $item) {
+                $list_followers[$key] = $item->user_from;
+            }
+        }
+        $friends = User::where('id', '!=', $id)
+            ->whereIn('id', $list_following)
+            ->whereIn('id', $list_followers)
+
+            ->count();
+        $info['friends'] = $friends;
+
         $info['photoCount'] = Post::where('id_user', $info['id'])
             ->where('status', 1)
             ->where('type', 'photo')
