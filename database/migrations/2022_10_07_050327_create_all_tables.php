@@ -21,19 +21,19 @@ return new class extends Migration
             $table->id();
             $table->integer('category')->default('1'); // 1 -> Usuário padrão, 2 -> ONG
             $table->string('email', 100);
+            $table->string('phone', 14)->nullable();
             $table->string('password', 200);
             $table->string('name', 100);
-            $table->string('phone', 14)->nullable();
             $table->string('instagram', 100)->nullable();
             $table->string('facebook', 120)->nullable();
             $table->string('biography', 240)->nullable();
             $table->integer('genre')->nullable();
             $table->date('birthdate');
-            $table->string('city', 100)->nullable();
             $table->string('latitude', 20)->nullable();
             $table->string('longitude', 20)->nullable();
             $table->string('work', 100)->nullable();
             $table->string('road', 200)->nullable();
+            $table->string('city', 100)->nullable();
             $table->string('district', 200)->nullable();
             $table->string('avatar', 100)->default('default_avatar_user.jpg');
             $table->string('cover', 100)->default('default_cover_user.jpg');
@@ -73,6 +73,30 @@ return new class extends Migration
             $table->integer('size')->nullable();
             $table->integer('fur')->nullable();
             $table->integer('situation')->nullable();
+            $table->integer('status')->default('1'); // 1 -> Ativo, 2 -> Desativado
+            $table->dateTime('date_register');
+            $table->dateTime('date_change')->nullable();
+        });
+
+        Schema::create('alerts', function (Blueprint $table) {
+            $table->charset = 'utf8mb4';
+            $table->collation = 'utf8mb4_unicode_ci';
+            $table->id();
+            $table->string('photo');
+            $table->integer('id_pet');
+            $table->integer('id_user');
+            $table->json('marked_users');
+            $table->string('tutor_name');
+            $table->string('description');
+            $table->dateTime('date_occurrence');
+            $table->string('road', 200);
+            $table->string('city', 100);
+            $table->string('district', 200);
+            $table->string('email', 100);
+            $table->string('phone', 14);
+            $table->string('latitude', 20);
+            $table->string('longitude', 20);
+            $table->string('distance');
             $table->integer('status')->default('1'); // 1 -> Ativo, 2 -> Desativado
             $table->dateTime('date_register');
             $table->dateTime('date_change')->nullable();

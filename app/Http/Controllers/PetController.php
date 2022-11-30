@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Pet;
+use App\Models\Alerts;
 use DateTime;
 use Intervention\Image\Facades\Image;
 
@@ -19,13 +20,108 @@ class PetController extends Controller
         $this->loggedUser = auth()->user();
     }
 
+    public function createAlert(Request $request)
+    {
+        $array = ['error' => ''];
+
+        $allowedTypes = ['image/jpg', 'image/jpeg', 'image/png'];
+        $photo = $request->file('photo');
+        $id_pet = $request->input('id_pet');
+        $id_user = $request->input('id_user');
+        $name = $request->input('name');
+        $addText = $request->input('addText');
+        $situation = $request->input('situation');
+        $date_occurrence = $request->input('date_occurrence');
+        $road = $request->input('road');
+        $district = $request->input('district');
+        $city = $request->input('city');
+        $email = $request->input('email');
+        $phone = $request->input('phone');
+        $latitude = $request->input('latitude');
+        $longitude = $request->input('longitude');
+
+        $lat = (float)($latitude);
+        $lon = (float)($longitude);
+
+
+        if ($photo) {
+            if (in_array($photo->getClientMimeType(), $allowedTypes)) {
+
+                $filename = md5(time() . rand(0, 9999)) . '.jpg';
+                switch ($situation) {
+                    case '2':
+                        $destPath = public_path('/media/image_alerts/adoption');
+                        break;
+                    case '3':
+                        $destPath = public_path('/media/image_alerts/lost');
+                        break;
+                    case '4':
+                        $destPath = public_path('/media/image_alerts/found');
+                        break;
+                    case '5':
+                        $destPath = public_path('/media/image_alerts/treatment');
+                        break;
+                    default:
+                        $array['error'] = 'Situação do pet não informada.';
+                        return $array;
+                        break;
+                }
+
+
+                $img = Image::make($photo->path())
+                    ->resize(800, null, function ($constraint) {
+                        $constraint->aspectRatio();
+                    })
+
+                    ->save($destPath . '/' . $filename);
+
+                $arquive_photo = $filename;
+            } else {
+                $array['error'] = 'Arquivo não suportado.';
+                return $array;
+            }
+        } else {
+            $array['error'] = 'Arquivo não enviado!';
+            return $array;
+        }
+
+        $list_recipients = User::select(User::raw('id, SQRT(
+            POW(69.1 * (latitude - ' . $lat . '), 2) +
+            POW(69.1 * (' . $lon . ' - longitude) * COS(latitude / 57.3), 2))*1.6 AS distance'))
+            ->havingRaw('distance < ?', [5])
+            ->orderBy('distance', 'ASC')
+            ->get();
+
+        foreach ($list_recipients as $key => $recipient) {
+            $newAlert = new Alerts();
+            $newAlert->photo = $arquive_photo;
+            $newAlert->id_pet = $id_pet;
+            $newAlert->id_user = $id_user;
+            $newAlert->marked_users = $recipient->id;
+            $newAlert->tutor_name = $name;
+            $newAlert->description = $addText;
+            $newAlert->date_occurrence = $date_occurrence;
+            $newAlert->road = $road;
+            $newAlert->city = $city;
+            $newAlert->district = $district;
+            $newAlert->email = $email;
+            $newAlert->phone = $phone;
+            $newAlert->latitude = $latitude;
+            $newAlert->longitude = $longitude;
+            $newAlert->distance = $recipient->distance;
+            $newAlert->date_register = date('Y-m-d H:i:s');
+            $newAlert->save();
+        }
+
+
+        return $array;
+    }
+
     public function create(Request $request)
     {
 
         //POST *api/user (nome, email, senha, data_nascimento, categoria)
         $array = ['error' => ''];
-
-
         $name = $request->input('name');
         $species = $request->input('species');
         $birthdate = $request->input('birthdate');

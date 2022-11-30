@@ -171,7 +171,7 @@ class UserController extends Controller
     public function UsersRelations(Request $request, $id_user, $latitude, $longitude)
     {
 
-
+        $me = User::find($this->loggedUser['id']);
         $array = ['error' => ''];
         $user = User::find($id_user);
         $lat = (float)($latitude);
@@ -291,7 +291,7 @@ class UserController extends Controller
             POW(69.1 * (' . $lon . ' - longitude) * COS(latitude / 57.3), 2))*1.6 AS distance'))
             ->where('id', '!=', $user->id)
             ->whereNotIn('id', $list_seguidos)
-            ->havingRaw('distance < ?', [5])
+            //->havingRaw('distance < ?', [5])
             ->orderBy('distance', 'ASC')
             ->get();
 

@@ -37,8 +37,6 @@ Route::get('/ping', function () {
 // LocationController
 // SearchController
 /*
-
-
 */
 
 // Route::get('/401', [AuthController::class, 'unauthorized'])->name('login');
@@ -92,6 +90,7 @@ Route::middleware('auth:api')->get('/user/{id}/feed', [FeedController::class, 'u
 // FALTA SEPARAR O FEED ENTRE POSTS "NORMAIS" E POSTS QUE SERÃO INTERPRETADOS COMO ALERTA, DE ACORDO COM UMA TAG A SER CRIADA
 // ASSIM SERÃO DOIS FEEDS PRINCIPAIS, DE POSTS NORMAIS E DE POSTS DE ALERTA
 // FALTA MEIO DE MARCAR OS PETS EM FOTOS, GERANDO GALERIA ESPECIFICA PARA CADA PET DE DONOS COM MAIS DE UM  PET
+Route::middleware('auth:api')->post('/user/{id}/pet/{id_pet}/alert', [PetController::class, 'createAlert']); //CADASTRAR PET AO USUÁRIO LOGADO
 
 //CADASTRO E ATUALIZAÇÃO DE PET
 Route::middleware('auth:api')->post('/user/pet', [PetController::class, 'create']); //CADASTRAR PET AO USUÁRIO LOGADO
