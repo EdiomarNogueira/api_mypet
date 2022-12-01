@@ -100,6 +100,7 @@ class PetController extends Controller
             $newAlert->marked_users = $recipient->id;
             $newAlert->tutor_name = $name;
             $newAlert->description = $addText;
+            $newAlert->situation = $situation;
             $newAlert->date_occurrence = $date_occurrence;
             $newAlert->road = $road;
             $newAlert->city = $city;
@@ -111,6 +112,12 @@ class PetController extends Controller
             $newAlert->distance = $recipient->distance;
             $newAlert->date_register = date('Y-m-d H:i:s');
             $newAlert->save();
+
+            $pet = Pet::find($id_pet);
+            $pet->situation = $situation;
+            $pet->date_change = date('Y-m-d H:i:s');
+            $pet->save();
+            $array['success'] = "Alerta gerado!";
         }
 
 
@@ -122,6 +129,7 @@ class PetController extends Controller
 
         //POST *api/user (nome, email, senha, data_nascimento, categoria)
         $array = ['error' => ''];
+
         $name = $request->input('name');
         $species = $request->input('species');
         $birthdate = $request->input('birthdate');
@@ -158,7 +166,7 @@ class PetController extends Controller
         $newPet->longitude = $longitude;
         $newPet->date_register = date('Y-m-d H:i:s');
         $newPet->save();
-
+        $array['success'] = 'Pet cadastrado com sucesso!';
         return $array;
     }
 
@@ -234,7 +242,7 @@ class PetController extends Controller
             }
             $pet->date_change = date('Y-m-d H:i:s');
             $pet->save();
-            return $array['sucess'] = 'Alteração no Pet efetuada com sucesso!';
+            $array['success'] = 'Alteração no Pet efetuada com sucesso!';
         } else {
             $array['error'] = 'O usuário não possui este pet';
         }
@@ -324,6 +332,76 @@ class PetController extends Controller
         return $array;
     }
 
+    public function readAlert(Request $request)
+    {
+        $array = ['error' => ''];
+        $page = 5;
+        $perPage = intval($request->input('perPage'));
+        $id_user =  $this->loggedUser['id'];
+        $Alerts = Alerts::selectRaw('*')
+            ->where('marked_users', $id_user)
+            ->whereIn('situation', [2, 3, 4, 5])
+            ->limit($perPage)
+            ->where('status', 1)
+            ->get();
+
+
+
+        foreach ($Alerts as $key => $alert) {
+            switch ($Alerts[$key]->situation) {
+                case 2:
+                    $Alerts[$key]->photo = url('media/image_alerts/adoption/' . $Alerts[$key]->photo);
+                    break;
+                case 3:
+                    $Alerts[$key]->photo = url('media/image_alerts/lost/' . $Alerts[$key]->photo);
+                    break;
+                case 4:
+                    $Alerts[$key]->photo = url('media/image_alerts/found/' . $Alerts[$key]->photo);
+                    break;
+                case 5:
+                    $Alerts[$key]->photo = url('media/image_alerts/treatment/' . $Alerts[$key]->photo);
+                    break;
+            }
+
+            $dados_tutor = User::selectRaw('avatar')
+                ->where('id', $Alerts[$key]->id_user)
+                ->where('status', 1)
+                ->first();
+
+            $Alerts[$key]->avatar_tutor = url('media/avatars_users/' . $dados_tutor->avatar);
+            $Alerts[$key]->distance = number_format($Alerts[$key]->distance, 2, '.', '');
+            $dados_pet = Pet::selectRaw('*')
+                ->where('id', $Alerts[$key]->id_pet)
+                ->where('status', 1)
+                ->first();
+            $Alerts[$key]->name_pet = $dados_pet->name;
+            $Alerts[$key]->breed = $dados_pet->breed;
+            $Alerts[$key]->species = $dados_pet->species;
+            $Alerts[$key]->genre = $dados_pet->genre;
+            $Alerts[$key]->size = $dados_pet->size;
+            $Alerts[$key]->fur = $dados_pet->fur;
+            $data_atual = new DateTime();
+            $nascimento = new DateTime($dados_pet->birthdate);
+            $intervalo = $nascimento->diff($data_atual);
+            if ($dados_pet->birthdate) {
+                if ($intervalo->y > 0 && $intervalo->m > 0) {
+                    $Alerts[$key]->age = $intervalo->y . " anos " . $intervalo->m . " meses ";
+                } else if ($intervalo->y > 0) {
+                    $Alerts[$key]->age = $intervalo->y . " anos ";
+                } else if ($intervalo->m > 0) {
+                    $Alerts[$key]->age = $intervalo->m . " meses ";
+                } else {
+                    $Alerts[$key]->age =  $intervalo->d . " dias";
+                }
+            } else {
+                $Alerts[$key]->age = 'Não estimado';
+            }
+        }
+        $array['alerts'] = $Alerts;
+        $array['countAlerts'] = count($Alerts);
+        return $array;
+    }
+
     public function readUserPet(Request $request, $id_user, $ids_pets = null)
     {
         $array = ['error' => ''];
@@ -346,7 +424,7 @@ class PetController extends Controller
         }
 
         $page = intval($request->input('page'));
-        $perPage = 2;
+        $perPage = 40;
 
         // foreach ($pets as $key => $pet) {
         $dados[] = Pet::selectRaw('*')

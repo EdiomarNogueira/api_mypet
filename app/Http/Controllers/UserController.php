@@ -379,7 +379,7 @@ class UserController extends Controller
         if ($id) {
             $info = User::find($id);
             if (!$info) {
-                $array['error'] = 'Usuário inexistente';
+                $array['error'] = 'Usuário inexistente!';
                 return $array;
             }
         } else {

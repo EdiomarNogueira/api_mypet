@@ -89,6 +89,7 @@ return new class extends Migration
             $table->string('tutor_name');
             $table->string('description');
             $table->dateTime('date_occurrence');
+            $table->integer('situation');
             $table->string('road', 200);
             $table->string('city', 100);
             $table->string('district', 200);

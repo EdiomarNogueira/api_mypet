@@ -75,6 +75,8 @@ Route::middleware('auth:api')->get('/user/pet/{id_pet}', [PetController::class, 
 Route::middleware('auth:api')->get('/user/{id}/pet/{id_pet}', [PetController::class, 'readUserPet']); //VER PET ESPECIFICO DE USUÁRIO ESPECIFICO -> adicionar avatar e cover
 //FEED
 //USUÁRIO
+Route::middleware('auth:api')->get('/user/alert', [PetController::class, 'readAlert']); //CADASTRAR PET AO USUÁRIO LOGADO
+
 Route::middleware('auth:api')->get('/user/{id}', [UserController::class, 'read']); //VER DADOS DE USUÁRIO ESPECIFICO
 Route::middleware('auth:api')->post('/user/{id}/follow', [UserController::class, 'follow']); //SEGUIR OU DEIXAR DE SEGUIR USUÁRIO
 Route::middleware('auth:api')->get('/user/{id}/follow', [UserController::class, 'verificFollow']); //SEGUIR OU DEIXAR DE SEGUIR USUÁRIO
