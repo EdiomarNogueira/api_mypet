@@ -10,6 +10,7 @@ use App\Models\Pet;
 use App\Models\Post_Like;
 use App\Models\Post_Comment;
 use Intervention\Image\Facades\Image;
+use Illuminate\Support\Facades\Storage;
 
 class FeedController extends Controller
 {
@@ -125,6 +126,70 @@ class FeedController extends Controller
         $array['pageCount'] = $pageCount;
         $array['currentPage'] = $page;
         return $posts;
+    }
+
+
+
+    public function deletePost(Request $request)
+    {
+        $array = ['error' => ''];
+
+        $id_delete = intval($request->input('id_delete'));
+        $id_user = intval($request->input('id_user'));
+        $filename = null;
+
+        if ($id_user == $this->loggedUser['id']) {
+            $post = Post::select('*')
+                ->where('id_user', $id_user)
+                ->where('id', $id_delete)
+                ->where('status', 1)
+                ->first();
+        } else {
+            $array['error'] = "Autor do post incompatível com autor da requisição";
+        }
+
+        if ($post) {
+            // APAGA FOTO DO POST
+            if ($post->type == 'photo') {
+                $filename = $post->body;
+            }
+
+            //APAGA LIKES DO POST
+            $likes = post_like::select('*')
+                ->where('id_post', $id_delete)
+                ->where('id_user', $id_user)
+                ->get();
+
+            //APAGA COMENTÁRIO DO POST
+            $comments = post_comment::select('*')
+                ->where('id_post', $id_delete)
+                ->where('id_user', $id_user)
+                ->get();
+
+            if ($comments) {
+                foreach ($comments as $item) {
+                    $item->delete();
+                }
+            }
+            if ($likes) {
+                foreach ($likes as $item) {
+                    $item->delete();
+                }
+            }
+
+            if ($filename) {
+                $destPath = public_path('/media/uploads');
+                if (file_exists($destPath . '/' . $filename)) {
+                    unlink($destPath . '/' . $filename);
+                }
+            }
+
+            $post->delete();
+
+            $array['success'] = "Post Deletado.";
+        }
+
+        return $array;
     }
 
     public function readLikes($id)

@@ -86,6 +86,8 @@ Route::middleware('auth:api')->post('/feed', [FeedController::class, 'create']);
 Route::middleware('auth:api')->get('/feed', [FeedController::class, 'read']); //LER POSTS DO FEED
 Route::middleware('auth:api')->get('/user/feed', [FeedController::class, 'userFeed']); //VER POSTS DO USUÁRIO LOGADO
 Route::middleware('auth:api')->get('/feed/post/{id}/likes', [FeedController::class, 'readLikes']); //LER POSTS DO FEED
+Route::middleware('auth:api')->post('/feed/delete/', [FeedController::class, 'deletePost']); //LER POSTS DO FEED
+Route::middleware('auth:api')->post('/feed/comment/delete', [PostController::class, 'deleteComment']);
 Route::middleware('auth:api')->get('/user/{id}/feed', [FeedController::class, 'userFeed']); //VER POSTS DE USUÁRIO ESPECIFICO
 
 

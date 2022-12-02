@@ -80,4 +80,26 @@ class PostController extends Controller
 
         return $array;
     }
+
+    public function deleteComment(Request $request)
+    {
+        $array = ['error' => ''];
+        $id_delete = intval($request->input('id_delete'));
+        $id_user = intval($request->input('id_user'));
+        if ($id_user == $this->loggedUser['id']) {
+            $comment = post_comment::select('*')
+                ->where('id_user', $id_user)
+                ->where('id', $id_delete)
+                ->where('status', 1)
+                ->first();
+
+            if ($comment) {
+                $comment->delete();
+            }
+        } else {
+            $array['error'] = "Autor do comentário incompatível com autor da requisição";
+        }
+
+        return $array;
+    }
 }
