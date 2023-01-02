@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Alerts;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\User_Relation;
@@ -9,6 +10,7 @@ use App\Models\Post;
 use App\Models\Pet;
 use App\Models\Post_Like;
 use App\Models\Post_Comment;
+use Illuminate\Console\View\Components\Alert;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Storage;
 
@@ -128,7 +130,56 @@ class FeedController extends Controller
         return $posts;
     }
 
+    public function deleteAlert(Request $request)
+    {
+        $array = ['error' => ''];
+        $id_alert = intval($request->input('id_alert'));
+        $id_user = intval($request->input('id_user'));
+        $situation = intval($request->input('situation'));
+        $id_pet = intval($request->input('id_pet'));
+        $filename = null;
 
+        $alerts = Alerts::select('*')
+            ->where('id_user', $id_user)
+            ->where('id_pet', $id_pet)
+            ->where('situation', $situation)
+            ->where('status', 1)
+            ->get();
+
+        foreach ($alerts as $alert) {
+            if ($alert) {
+                $filename = $alert->photo;
+                $destPath = '';
+                switch ($alert->situation) {
+                    case '2':
+                        $destPath = public_path('/media/image_alerts/adoption');
+                        break;
+                    case '3':
+                        $destPath = public_path('/media/image_alerts/lost');
+                        break;
+                    case '4':
+                        $destPath = public_path('/media/image_alerts/found');
+                        break;
+                    case '5':
+                        $destPath = public_path('/media/image_alerts/treatment');
+                        break;
+                    default:
+                        $array['error'] = 'Situação do pet não informada.';
+                        return $array;
+                        break;
+                }
+
+                if (file_exists($destPath . '/' . $filename)) {
+                    unlink($destPath . '/' . $filename);
+                }
+
+                $alert->delete();
+            }
+        }
+
+        $array['success'] = "Alerta Deletado.";
+        return $array;
+    }
 
     public function deletePost(Request $request)
     {

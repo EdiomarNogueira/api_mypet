@@ -163,7 +163,7 @@ class UserController extends Controller
         if ($facebook) {
             $user->facebook = $facebook;
         }
-
+        $array['success'] = "Usuário atualizado com sucesso!";
         $user->save();
         return $array;
     }
@@ -252,11 +252,13 @@ class UserController extends Controller
         if ($followers) {
             foreach ($followers as $key => $item) {
                 $followers[$key]->avatar = url('media/avatars_users/' . $followers[$key]->avatar);
-                if (in_array($followers[$key]->id, $list_following)) {
-                    $followers[$key]->isFollowing = true;
-                } else {
-                    $followers[$key]->isFollowing = false;
-                }
+                 $verific_follow = $this->verificFollow($followers[$key]->id);
+                 $followers[$key]->isFollowing = $verific_follow['isFollower'];
+                // if (in_array($followers[$key]->id, $list_following)) {
+                //     $followers[$key]->isFollowing = true;
+                // } else {
+                //     $followers[$key]->isFollowing = false;
+                // }
             }
         }
 
@@ -322,6 +324,15 @@ class UserController extends Controller
                     ->save($destPath . '/' . $filename);
 
                 $user = User::find($this->loggedUser['id']);
+
+                //APAGA O ARQUIVO DE AVATAR USER ANTERIOR CASO NÃO SEJA O DEFAULT
+                if ($user->cover != 'default_cover_user.jpg') {
+                    $destPath = public_path('/media/covers_users');
+                    if (file_exists($destPath . '/' . $user->cover)) {
+                        unlink($destPath . '/' . $user->cover);
+                    }
+                }
+
                 $user->cover = $filename;
                 $user->save();
 
@@ -354,6 +365,15 @@ class UserController extends Controller
                     ->save($destPath . '/' . $filename);
 
                 $user = User::find($this->loggedUser['id']);
+
+                //APAGA O ARQUIVO DE AVATAR USER ANTERIOR CASO NÃO SEJA O DEFAULT
+                if ($user->avatar != 'default_avatar_user.jpg') {
+                    $destPath = public_path('/media/avatars_users');
+                    if (file_exists($destPath . '/' . $user->avatar)) {
+                        unlink($destPath . '/' . $user->avatar);
+                    }
+                }
+
                 $user->avatar = $filename;
                 $user->save();
 

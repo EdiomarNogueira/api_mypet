@@ -43,7 +43,6 @@ class PetController extends Controller
         $lat = (float)($latitude);
         $lon = (float)($longitude);
 
-
         if ($photo) {
             if (in_array($photo->getClientMimeType(), $allowedTypes)) {
 
@@ -66,7 +65,6 @@ class PetController extends Controller
                         return $array;
                         break;
                 }
-
 
                 $img = Image::make($photo->path())
                     ->resize(800, null, function ($constraint) {
@@ -274,6 +272,16 @@ class PetController extends Controller
                         ->save($destPath . '/' . $filename);
 
                     $pet = Pet::find($id_pet);
+
+
+                    //APAGA O ARQUIVO DE AVATAR USER ANTERIOR CASO NÃO SEJA O DEFAULT
+                    if (($pet->avatar != 'dog_avatar_default.jpg') && ($pet->avatar != 'cat_avatar_default.jpg')) {
+                        $destPath = public_path('/media/avatars_pets');
+                        if (file_exists($destPath . '/' . $pet->avatar)) {
+                            unlink($destPath . '/' . $pet->avatar);
+                        }
+                    }
+
                     $pet->avatar = $filename;
                     $pet->save();
 
@@ -315,6 +323,14 @@ class PetController extends Controller
                         ->save($destPath . '/' . $filename);
 
                     $pet = Pet::find($id_pet);
+
+                    if (($pet->cover != 'default_cover_pet.jpg')) {
+                        $destPath = public_path('/media/covers_pets');
+                        if (file_exists($destPath . '/' . $pet->cover)) {
+                            unlink($destPath . '/' . $pet->cover);
+                        }
+                    }
+
                     $pet->cover = $filename;
                     $pet->save();
 
