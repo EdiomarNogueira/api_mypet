@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
+use Illuminate\Support\Arr;
 use App\Models\User_Relation;
 use App\Models\Post;
 
@@ -316,7 +317,7 @@ class UserController extends Controller
 
         if ($image) {
             if (in_array($image->getClientMimeType(), $allowedTypes)) {
-                $filename = md5(time() . rand(0, 9999)) . '.jpg';
+                $filename = md5(time() . Arr::rand(0, 9999)) . '.jpg';
                 $destPath = public_path('/media/covers_users');
 
                 $img = Image::make($image->path())
@@ -357,7 +358,7 @@ class UserController extends Controller
 
         if ($image) {
             if (in_array($image->getClientMimeType(), $allowedTypes)) {
-                $filename = md5(time() . rand(0, 9999)) . '.jpg';
+                $filename = md5(time() . Arr::rand(0, 9999)) . '.jpg';
                 $destPath = public_path('/media/avatars_users');
 
                 $img = Image::make($image->path())

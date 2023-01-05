@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Pet;
 use App\Models\Alerts;
+use Illuminate\Support\Arr;
 use DateTime;
 use Intervention\Image\Facades\Image;
 
@@ -46,7 +47,7 @@ class PetController extends Controller
         if ($photo) {
             if (in_array($photo->getClientMimeType(), $allowedTypes)) {
 
-                $filename = md5(time() . rand(0, 9999)) . '.jpg';
+                $filename = md5(time() . Arr::rand(0, 9999)) . '.jpg';
                 switch ($situation) {
                     case '2':
                         $destPath = public_path('/media/image_alerts/adoption');
@@ -264,7 +265,7 @@ class PetController extends Controller
             $image = $request->file('avatar');
             if ($image) {
                 if (in_array($image->getClientMimeType(), $allowedTypes)) {
-                    $filename = md5(time() . rand(0, 9999)) . '.jpg';
+                    $filename = md5(time() . Arr::rand(0, 9999)) . '.jpg';
                     $destPath = public_path('/media/avatars_pets');
 
                     $img = Image::make($image->path())
@@ -315,7 +316,7 @@ class PetController extends Controller
 
             if ($image) {
                 if (in_array($image->getClientMimeType(), $allowedTypes)) {
-                    $filename = md5(time() . rand(0, 9999)) . '.jpg';
+                    $filename = md5(time() . Arr::rand(0, 9999)) . '.jpg';
                     $destPath = public_path('/media/covers_pets');
 
                     $img = Image::make($image->path())
@@ -379,12 +380,13 @@ class PetController extends Controller
                     break;
             }
 
-            $dados_tutor = User::selectRaw('avatar')
+            $dados_tutor = User::selectRaw('avatar, name')
                 ->where('id', $Alerts[$key]->id_user)
                 ->where('status', 1)
                 ->first();
 
             $Alerts[$key]->avatar_tutor = url('media/avatars_users/' . $dados_tutor->avatar);
+            $Alerts[$key]->name_tutor = $dados_tutor->name;
             $Alerts[$key]->distance = number_format($Alerts[$key]->distance, 2, '.', '');
             $dados_pet = Pet::selectRaw('*')
                 ->where('id', $Alerts[$key]->id_pet)
