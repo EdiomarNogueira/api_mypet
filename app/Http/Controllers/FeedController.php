@@ -11,7 +11,6 @@ use App\Models\Pet;
 use App\Models\Post_Like;
 use App\Models\Post_Comment;
 use Illuminate\Console\View\Components\Alert;
-use Illuminate\Support\Arr;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Storage;
 
@@ -50,7 +49,7 @@ class FeedController extends Controller
                     if ($photo) {
                         if (in_array($photo->getClientMimeType(), $allowedTypes)) {
 
-                            $filename = md5(time() . Arr::rand(0, 9999)) . '.jpg';
+                            $filename = md5(time() . rand(0, 9999)) . '.jpg';
                             $destPath = public_path('/media/uploads');
 
                             $img = Image::make($photo->path())

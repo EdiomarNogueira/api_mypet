@@ -47,7 +47,7 @@ class PetController extends Controller
         if ($photo) {
             if (in_array($photo->getClientMimeType(), $allowedTypes)) {
 
-                $filename = md5(time() . Arr::rand(0, 9999)) . '.jpg';
+                $filename = md5(time() . rand(0, 9999)) . '.jpg';
                 switch ($situation) {
                     case '2':
                         $destPath = public_path('/media/image_alerts/adoption');
@@ -265,7 +265,7 @@ class PetController extends Controller
             $image = $request->file('avatar');
             if ($image) {
                 if (in_array($image->getClientMimeType(), $allowedTypes)) {
-                    $filename = md5(time() . Arr::rand(0, 9999)) . '.jpg';
+                    $filename = md5(time() . rand(0, 9999)) . '.jpg';
                     $destPath = public_path('/media/avatars_pets');
 
                     $img = Image::make($image->path())
@@ -316,7 +316,7 @@ class PetController extends Controller
 
             if ($image) {
                 if (in_array($image->getClientMimeType(), $allowedTypes)) {
-                    $filename = md5(time() . Arr::rand(0, 9999)) . '.jpg';
+                    $filename = md5(time() . rand(0, 9999)) . '.jpg';
                     $destPath = public_path('/media/covers_pets');
 
                     $img = Image::make($image->path())
