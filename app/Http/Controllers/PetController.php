@@ -47,7 +47,7 @@ class PetController extends Controller
         if ($photo) {
             if (in_array($photo->getClientMimeType(), $allowedTypes)) {
 
-                $filename = md5(time() . Arr::rand(0, 9999)) . '.jpg';
+                $filename = md5(time() . rand(0, 9999)) . '.jpg';
                 switch ($situation) {
                     case '2':
                         $destPath = public_path('/media/image_alerts/adoption');
@@ -86,10 +86,15 @@ class PetController extends Controller
 
         $list_recipients = User::select(User::raw('id, SQRT(
             POW(69.1 * (latitude - ' . $lat . '), 2) +
-            POW(69.1 * (' . $lon . ' - longitude) * COS(latitude / 57.3), 2))*1.6 AS distance'))
-            ->havingRaw('distance < ?', [5])
+            POW(69.1 * (' . $lon . ' - longitude) * COS(latitude / 57.3), 2))*1.609344 AS distance'))
+            ->havingRaw('distance < ?', [10000])
             ->orderBy('distance', 'ASC')
             ->get();
+
+        $array['var'] =  $list_recipients;
+        if (count($list_recipients) == 0) {
+            $array['error'] = 'Não há usuários em um raio de 10km!';
+        }
 
         foreach ($list_recipients as $key => $recipient) {
             $newAlert = new Alerts();
@@ -106,8 +111,8 @@ class PetController extends Controller
             $newAlert->district = $district;
             $newAlert->email = $email;
             $newAlert->phone = $phone;
-            $newAlert->latitude = $latitude;
-            $newAlert->longitude = $longitude;
+            $newAlert->latitude = $lat;
+            $newAlert->longitude = $lon;
             $newAlert->distance = $recipient->distance;
             $newAlert->date_register = date('Y-m-d H:i:s');
             $newAlert->save();
@@ -169,9 +174,12 @@ class PetController extends Controller
         return $array;
     }
 
+    //CRIAR FUNÇÃO QUE ATUALIZA LATITUDE E LONGITUDE DOS PETS
+
+
+
     public function update(Request $request, $id_pet)
     {
-
         $array = ['error' => ''];
         //VERIFICAR SE EXISTE PET DO USUÁRIO
         $id = $this->loggedUser['id'];
@@ -265,7 +273,7 @@ class PetController extends Controller
             $image = $request->file('avatar');
             if ($image) {
                 if (in_array($image->getClientMimeType(), $allowedTypes)) {
-                    $filename = md5(time() . Arr::rand(0, 9999)) . '.jpg';
+                    $filename = md5(time() . rand(0, 9999)) . '.jpg';
                     $destPath = public_path('/media/avatars_pets');
 
                     $img = Image::make($image->path())
@@ -316,7 +324,7 @@ class PetController extends Controller
 
             if ($image) {
                 if (in_array($image->getClientMimeType(), $allowedTypes)) {
-                    $filename = md5(time() . Arr::rand(0, 9999)) . '.jpg';
+                    $filename = md5(time() . rand(0, 9999)) . '.jpg';
                     $destPath = public_path('/media/covers_pets');
 
                     $img = Image::make($image->path())
@@ -360,6 +368,7 @@ class PetController extends Controller
             ->whereIn('situation', [2, 3, 4, 5])
             ->limit($perPage)
             ->where('status', 1)
+            ->orderBy('date_occurrence', 'desc')
             ->get();
 
 

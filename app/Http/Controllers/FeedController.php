@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+// use App\Events\Post\NewPost;
 use App\Models\Alerts;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -10,10 +11,12 @@ use App\Models\Post;
 use App\Models\Pet;
 use App\Models\Post_Like;
 use App\Models\Post_Comment;
-use Illuminate\Console\View\Components\Alert;
+// use Illuminate\Broadcasting\Channel;
+// use Illuminate\Console\View\Components\Alert;
 use Illuminate\Support\Arr;
+// use Illuminate\Support\Facades\Event;
 use Intervention\Image\Facades\Image;
-use Illuminate\Support\Facades\Storage;
+// use Illuminate\Support\Facades\Storage;
 
 class FeedController extends Controller
 {
@@ -50,7 +53,7 @@ class FeedController extends Controller
                     if ($photo) {
                         if (in_array($photo->getClientMimeType(), $allowedTypes)) {
 
-                            $filename = md5(time() . Arr::rand(0, 9999)) . '.jpg';
+                            $filename = md5(time() . rand(0, 9999)) . '.jpg';
                             $destPath = public_path('/media/uploads');
 
                             $img = Image::make($photo->path())
@@ -88,11 +91,37 @@ class FeedController extends Controller
                     $newPost->subtitle = $subtitle;
                 }
                 $newPost->save();
+                //Event::dispatch(new NewPost($newPost, 'user'.$this->loggedUser['id']));
             }
         } else {
             $array['error'] = 'Dados não enviados';
             return $array;
         }
+        return $array;
+    }
+
+    public function readUpdates()
+    {
+        //count em posts
+        //count em mensagens em posts
+        //count em likes em posts
+
+        //retornar valores
+        $array = ['error' => ''];
+        $users = [];
+        $userList = User_Relation::Where('user_from', $this->loggedUser['id'])->get();
+        foreach ($userList as $userItem) {
+            $users[] = $userItem['user_to'];
+        }
+
+        $users[] = $this->loggedUser['id'];
+        $count_posts = Post::whereIn('id_user', $users)
+            ->where('status', 1)
+            ->where('situation', 0)
+            ->get()->count();
+
+        $array['count'] = $count_posts;
+
         return $array;
     }
 
@@ -125,10 +154,11 @@ class FeedController extends Controller
         //3 - Preencher as informações adicionais
         $posts = $this->_postListToObject($postList, $this->loggedUser['id']);
 
+        $array['count_posts'] = $this->readUpdates();
         $array['posts'] = $posts;
         $array['pageCount'] = $pageCount;
         $array['currentPage'] = $page;
-        return $posts;
+        return $array;
     }
 
     public function deleteAlert(Request $request)

@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use App\Models\User_Relation;
 use App\Models\Post;
+use App\Models\Pet;
 
 use Intervention\Image\Facades\Image;
 
@@ -96,7 +96,6 @@ class UserController extends Controller
             $user->district = $district;
         }
 
-
         //PASSWORD
         if ($password && $password_confirm) {
             if ($password === $password_confirm) {
@@ -114,13 +113,11 @@ class UserController extends Controller
         }
         //PHONE
         if ($phone) {
-
             $rule = [
                 'phone' => 'celular_com_ddd',
             ];
 
             $validator = Validator::make($request->all(), $rule);
-
             if ($validator->fails()) {
                 $array['error'] = $validator->messages();
                 return $array;
@@ -150,6 +147,8 @@ class UserController extends Controller
         if ($latitude && $longitude) {
             $user->latitude = $latitude;
             $user->longitude = $longitude;
+            //CHAMAR FUNÇÃO DO PETCONTROLLER PASSANDO LATITUDE E LONGITUDE PARA ATUALIZAR O PET
+            $this->updateLocationPet($user->id, $latitude, $longitude);
         } else if (($latitude == null && $longitude) || ($latitude && $longitude == null)) {
             $array['error'] = 'É necessário cadastrar a latitude e a longitude!';
             return $array;
@@ -166,6 +165,20 @@ class UserController extends Controller
         $array['success'] = "Usuário atualizado com sucesso!";
         $user->save();
         return $array;
+    }
+
+    public function updateLocationPet($id_user, $latitude, $longitude)
+    {
+        $petsUser = Pet::select('id')
+            ->where('id_user', $id_user)
+            ->get();
+
+        foreach ($petsUser as $petUser) {
+            $pet = Pet::find($petUser->id);
+            $pet->latitude = $latitude;
+            $pet->longitude = $longitude;
+            $pet->save();
+        }
     }
 
     public function UsersRelations(Request $request, $id_user, $latitude, $longitude)
@@ -252,8 +265,8 @@ class UserController extends Controller
         if ($followers) {
             foreach ($followers as $key => $item) {
                 $followers[$key]->avatar = url('media/avatars_users/' . $followers[$key]->avatar);
-                 $verific_follow = $this->verificFollow($followers[$key]->id);
-                 $followers[$key]->isFollowing = $verific_follow['isFollower'];
+                $verific_follow = $this->verificFollow($followers[$key]->id);
+                $followers[$key]->isFollowing = $verific_follow['isFollower'];
                 // if (in_array($followers[$key]->id, $list_following)) {
                 //     $followers[$key]->isFollowing = true;
                 // } else {
