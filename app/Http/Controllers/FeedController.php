@@ -177,6 +177,10 @@ class FeedController extends Controller
             ->where('status', 1)
             ->get();
 
+
+        //BUSCAR TODOS COMENTÁRIOS DO ALERTA E DELETAR
+        //BUSCAR IMAGENS DE COMENTÁRIOS DE ALERTA E APAGAR
+
         foreach ($alerts as $alert) {
             if ($alert) {
                 $filename = $alert->photo;

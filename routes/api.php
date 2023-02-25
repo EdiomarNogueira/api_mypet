@@ -8,7 +8,7 @@ use App\Http\Controllers\FeedController;
 use App\Http\Controllers\PetController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\SearchController;
-
+use App\Http\Controllers\AlertController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -76,6 +76,8 @@ Route::middleware('auth:api')->get('/user/{id}/pet/{id_pet}', [PetController::cl
 //FEED
 //USUÁRIO
 Route::middleware('auth:api')->get('/user/alert', [PetController::class, 'readAlert']); //CADASTRAR PET AO USUÁRIO LOGADO
+Route::middleware('auth:api')->post('/alert/{id}/comment', [AlertController::class, 'comment']);
+Route::middleware('auth:api')->get('/alert/{id}/pet/{id_pet}/positions', [AlertController::class, 'positionsAlert']);
 
 Route::middleware('auth:api')->get('/user/{id}', [UserController::class, 'read']); //VER DADOS DE USUÁRIO ESPECIFICO
 Route::middleware('auth:api')->post('/user/{id}/follow', [UserController::class, 'follow']); //SEGUIR OU DEIXAR DE SEGUIR USUÁRIO
@@ -104,8 +106,8 @@ Route::middleware('auth:api')->put('/user/pet/{id_pet}', [PetController::class, 
 Route::middleware('auth:api')->post('/user/pet/{id_pet}/avatar', [PetController::class, 'updateAvatar']); //ATUALIZAR AVATAR DO PET
 Route::middleware('auth:api')->post('/user/pet/{id_pet}/cover', [PetController::class, 'updateCover']); //ATUALIZAR BACKGROUND DO PERFIL DO PET
 //POST
-Route::post('/post/{id}/like', [PostController::class, 'like']);
-Route::post('/post/{id}/comment', [PostController::class, 'comment']);
+Route::middleware('auth:api')->post('/post/{id}/like', [PostController::class, 'like']);
+Route::middleware('auth:api')->post('/post/{id}/comment', [PostController::class, 'comment']);
 //BUSCA
 Route::get('/search', [SearchController::class, 'search']);
 
