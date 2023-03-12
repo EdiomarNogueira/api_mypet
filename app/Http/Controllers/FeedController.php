@@ -6,11 +6,11 @@ namespace App\Http\Controllers;
 use App\Models\Alerts;
 use Illuminate\Http\Request;
 use App\Models\User;
-use App\Models\User_Relation;
+use App\Models\UserRelation;
 use App\Models\Post;
 use App\Models\Pet;
-use App\Models\Post_Like;
-use App\Models\Post_Comment;
+use App\Models\PostLike;
+use App\Models\PostComment;
 // use Illuminate\Broadcasting\Channel;
 // use Illuminate\Console\View\Components\Alert;
 use Illuminate\Support\Arr;
@@ -100,7 +100,7 @@ class FeedController extends Controller
         return $array;
     }
 
-    public function readUpdates()
+    public function read_updates()
     {
         //count em posts
         //count em mensagens em posts
@@ -109,7 +109,7 @@ class FeedController extends Controller
         //retornar valores
         $array = ['error' => ''];
         $users = [];
-        $userList = User_Relation::Where('user_from', $this->loggedUser['id'])->get();
+        $userList = UserRelation::Where('user_from', $this->loggedUser['id'])->get();
         foreach ($userList as $userItem) {
             $users[] = $userItem['user_to'];
         }
@@ -133,7 +133,7 @@ class FeedController extends Controller
         $perPage = intval($request->input('perPage'));
         //1 - Pegar lista de usuários que EU sigo (incluindo eu mesmo)
         $users = [];
-        $userList = User_Relation::Where('user_from', $this->loggedUser['id'])->get();
+        $userList = UserRelation::Where('user_from', $this->loggedUser['id'])->get();
         foreach ($userList as $userItem) {
             $users[] = $userItem['user_to'];
         }
@@ -154,14 +154,14 @@ class FeedController extends Controller
         //3 - Preencher as informações adicionais
         $posts = $this->_postListToObject($postList, $this->loggedUser['id']);
 
-        $array['count_posts'] = $this->readUpdates();
+        $array['count_posts'] = $this->read_updates();
         $array['posts'] = $posts;
         $array['pageCount'] = $pageCount;
         $array['currentPage'] = $page;
         return $array;
     }
 
-    public function deleteAlert(Request $request)
+    public function delete_alert(Request $request)
     {
         $array = ['error' => ''];
         $id_alert = intval($request->input('id_alert'));
@@ -216,7 +216,7 @@ class FeedController extends Controller
         return $array;
     }
 
-    public function deletePost(Request $request)
+    public function delete_post(Request $request)
     {
         $array = ['error' => ''];
 
@@ -241,13 +241,13 @@ class FeedController extends Controller
             }
 
             //APAGA LIKES DO POST
-            $likes = Post_Like::select('*')
+            $likes = PostLike::select('*')
                 ->where('id_post', $id_delete)
                 ->where('id_user', $id_user)
                 ->get();
 
             //APAGA COMENTÁRIO DO POST
-            $comments = Post_Comment::select('*')
+            $comments = PostComment::select('*')
                 ->where('id_post', $id_delete)
                 ->where('id_user', $id_user)
                 ->get();
@@ -278,12 +278,12 @@ class FeedController extends Controller
         return $array;
     }
 
-    public function readLikes($id)
+    public function read_likes($id)
     {
         $array = ['error' => ''];
         // $id_post = intval($request->input('id_post'));
 
-        $likes = Post_Like::where('id_post', $id)
+        $likes = PostLike::where('id_post', $id)
             ->where('status', 1)
             ->get();
 
@@ -321,17 +321,17 @@ class FeedController extends Controller
             $userInfo['cover'] = url('media/covers_users/' . $userInfo['cover']);
             $postList[$postKey]['user'] = $userInfo;
             // Preencher informações de LIKE
-            $likes = Post_Like::where('id_post', $postItem['id'])->where('status', 1)->count();
+            $likes = PostLike::where('id_post', $postItem['id'])->where('status', 1)->count();
             $postList[$postKey]['likeCount'] = $likes;
 
-            $isLiked = Post_Like::where('id_post', $postItem['id'])
+            $isLiked = PostLike::where('id_post', $postItem['id'])
                 ->where('id_user', $loggedId)
                 ->where('status', 1)
                 ->count();
             $postList[$postKey]['liked'] = ($isLiked > 0) ? true : false;
 
             // Preencher informações de COMMENTS
-            $comments = Post_Comment::where('id_post', $postItem['id'])->get();
+            $comments = PostComment::where('id_post', $postItem['id'])->get();
             foreach ($comments as $commentsKey => $comment) {
                 $user = User::find($comment['id_user']);
                 $user['avatar'] = url('media/avatars_users/' . $user['avatar']);
@@ -370,7 +370,7 @@ class FeedController extends Controller
         return $postList;
     }
 
-    public function userFeed(Request $request, $id = false)
+    public function user_feed(Request $request, $id = false)
     {
 
         $array = ['error' => ''];
@@ -403,7 +403,7 @@ class FeedController extends Controller
     }
 
 
-    public function userPhotosPet(Request $request, $id = false, $id_pet = false)
+    public function user_photos_pet(Request $request, $id = false, $id_pet = false)
     {
         $array = ['error' => ''];
 
@@ -445,7 +445,7 @@ class FeedController extends Controller
         return $array;
     }
 
-    public function userPhotos(Request $request, $id = false)
+    public function user_photos(Request $request, $id = false)
     {
         $array = ['error' => ''];
 

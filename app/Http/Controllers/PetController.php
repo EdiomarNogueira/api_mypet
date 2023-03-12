@@ -21,7 +21,7 @@ class PetController extends Controller
         $this->loggedUser = auth()->user();
     }
 
-    public function createAlert(Request $request)
+    public function create_alert(Request $request)
     {
         $array = ['error' => ''];
 
@@ -257,7 +257,7 @@ class PetController extends Controller
         return $array;
     }
 
-    public function updateAvatar(Request $request, $id_pet)
+    public function update_avatar(Request $request, $id_pet)
     {
         $id = $this->loggedUser['id'];
 
@@ -308,7 +308,7 @@ class PetController extends Controller
         return $array;
     }
 
-    public function updateCover(Request $request, $id_pet)
+    public function update_cover(Request $request, $id_pet)
     {
         $id = $this->loggedUser['id'];
 
@@ -357,7 +357,7 @@ class PetController extends Controller
         return $array;
     }
 
-    public function readAlert(Request $request)
+    public function read_alert(Request $request)
     {
         $array = ['error' => ''];
         $page = 5;
@@ -429,7 +429,7 @@ class PetController extends Controller
         return $array;
     }
 
-    public function readUserPet(Request $request, $id_user, $ids_pets = null)
+    public function read_user_pet(Request $request, $id_user, $ids_pets = null)
     {
         $array = ['error' => ''];
 
@@ -507,7 +507,7 @@ class PetController extends Controller
         return $array;
     }
 
-    public function readMePet(Request $request, $id_pet = null)
+    public function read_me_pet(Request $request, $id_pet = null)
     {
         $array = ['error' => ''];
         $id_user = $this->loggedUser['id'];

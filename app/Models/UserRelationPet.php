@@ -5,9 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Post_Comment extends Model
+class UserRelationPet extends Model
 {
     public $timestamps = false;
-    protected $tables = "post_comments";
+    protected $tables = "user_relations_pets";
 
 }

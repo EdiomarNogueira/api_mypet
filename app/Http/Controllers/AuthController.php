@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 
 
-class AuthController extends Controller
+class authController extends Controller
 {
 
     public function __construct()
@@ -142,7 +142,7 @@ class AuthController extends Controller
         //
     }
 
-    public function validatetoken() {
+    public function validate_token() {
         $user = Auth::user();
         $array['data'] = [
             'user' => [

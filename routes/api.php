@@ -51,60 +51,60 @@ Route::get('/', [AuthController::class, '']); //BUSCAR USUÁRIO LOGADO
 Route::post('/user/user_register', [AuthController::class, 'create']); //CRIAR USUÁRIO
 Route::post('/auth/login', [AuthController::class, 'login']); //LOGAR USUÁRIO
 Route::post('/auth/refresh', [AuthController::class, 'refresh']);
-Route::post('/validate', [AuthController::class, 'validatetoken']);
+Route::post('/validate', [AuthController::class, 'validate_token']);
 Route::middleware('auth:api')->post('/auth/logout', [AuthController::class, 'logout']); //SAIR DO USUÁRIO
 Route::middleware('auth:api')->get('/auth/me', [AuthController::class, 'me']); //BUSCAR USUÁRIO LOGADO
 //USUÁRIO
 Route::middleware('auth:api')->put('/user', [UserController::class, 'update']); //ATUALIZAR USUÁRIO
-Route::middleware('auth:api')->post('/user/avatar', [UserController::class, 'updateAvatar']); //ATUALIZAR AVATAR
-Route::middleware('auth:api')->post('/user/cover', [UserController::class, 'updateCover']); //ATUALIZAR BACKGROUND DO PERFIL
-Route::middleware('auth:api')->get('/user/recommended/{latitude}/{longitude}', [UserController::class, 'UsersRecommended']); //LER DADOS DO USUÁRIO
-Route::middleware('auth:api')->get('/user/{id_user}/connections/{latitude}/{longitude}', [UserController::class, 'UsersRelations']); //BUSCA AMIGOS DO USUÁRiO
+Route::middleware('auth:api')->post('/user/avatar', [UserController::class, 'update_avatar']); //ATUALIZAR AVATAR
+Route::middleware('auth:api')->post('/user/cover', [UserController::class, 'update_cover']); //ATUALIZAR BACKGROUND DO PERFIL
+Route::middleware('auth:api')->get('/user/recommended/{latitude}/{longitude}', [UserController::class, 'users_recommended']); //LER DADOS DO USUÁRIO
+Route::middleware('auth:api')->get('/user/{id_user}/connections/{latitude}/{longitude}', [UserController::class, 'users_relations']); //BUSCA AMIGOS DO USUÁRiO
 Route::middleware('auth:api')->get('/user', [UserController::class, 'read']); //LER DADOS DO USUÁRIO
 
 //OBTER DADOS DE PET CADASTRADO
-Route::middleware('auth:api')->get('/user/{id}/photos', [FeedController::class, 'userPhotos']);  //VER POSTAGENS COM FOTOS
-Route::middleware('auth:api')->get('/user/{id}/photos/pet/{id_pet}', [FeedController::class, 'userPhotosPet']);  //VER POSTAGENS COM FOTOS COM PETS MARCADOS
+Route::middleware('auth:api')->get('/user/{id}/photos', [FeedController::class, 'user_photos']);  //VER POSTAGENS COM FOTOS
+Route::middleware('auth:api')->get('/user/{id}/photos/pet/{id_pet}', [FeedController::class, 'user_photos_pet']);  //VER POSTAGENS COM FOTOS COM PETS MARCADOS
 
-Route::middleware('auth:api')->get('/user/photos', [FeedController::class, 'userPhotos']); //VER FOGOS DO USUÁRIO
-Route::middleware('auth:api')->get('/user/pet', [PetController::class, 'readMePet']); //VER TODOS PETS DE USUÁRIO LOGADO ->adicionar avatar
+Route::middleware('auth:api')->get('/user/photos', [FeedController::class, 'user_photos']); //VER FOGOS DO USUÁRIO
+Route::middleware('auth:api')->get('/user/pet', [PetController::class, 'read_me_pet']); //VER TODOS PETS DE USUÁRIO LOGADO ->adicionar avatar
 
-Route::middleware('auth:api')->get('/user/{id}/pet', [PetController::class, 'readUserPet']); //VER PET ESPECIFICO DE USUÁRIO ESPECIFICO -> adicionar avatar e cover
+Route::middleware('auth:api')->get('/user/{id}/pet', [PetController::class, 'read_user_pet']); //VER PET ESPECIFICO DE USUÁRIO ESPECIFICO -> adicionar avatar e cover
 
-Route::middleware('auth:api')->get('/user/pet/{id_pet}', [PetController::class, 'readMePet']); //VER PET ESPECIFICO DE USUÁRIO LOGADO -> adicionar avatar e cover
-Route::middleware('auth:api')->get('/user/{id}/pet/{id_pet}', [PetController::class, 'readUserPet']); //VER PET ESPECIFICO DE USUÁRIO ESPECIFICO -> adicionar avatar e cover
+Route::middleware('auth:api')->get('/user/pet/{id_pet}', [PetController::class, 'read_me_pet']); //VER PET ESPECIFICO DE USUÁRIO LOGADO -> adicionar avatar e cover
+Route::middleware('auth:api')->get('/user/{id}/pet/{id_pet}', [PetController::class, 'read_user_pet']); //VER PET ESPECIFICO DE USUÁRIO ESPECIFICO -> adicionar avatar e cover
 //FEED
 //USUÁRIO
-Route::middleware('auth:api')->get('/user/alert', [PetController::class, 'readAlert']); //CADASTRAR PET AO USUÁRIO LOGADO
+Route::middleware('auth:api')->get('/user/alert', [PetController::class, 'read_alert']); //CADASTRAR PET AO USUÁRIO LOGADO
 Route::middleware('auth:api')->post('/alert/{id}/comment', [AlertController::class, 'comment']);
-Route::middleware('auth:api')->get('/alert/{id}/pet/{id_pet}/positions', [AlertController::class, 'positionsAlert']);
+Route::middleware('auth:api')->get('/alert/{id}/pet/{id_pet}/positions', [AlertController::class, 'positions_alert']);
 
 Route::middleware('auth:api')->get('/user/{id}', [UserController::class, 'read']); //VER DADOS DE USUÁRIO ESPECIFICO
 Route::middleware('auth:api')->post('/user/{id}/follow', [UserController::class, 'follow']); //SEGUIR OU DEIXAR DE SEGUIR USUÁRIO
-Route::middleware('auth:api')->get('/user/{id}/follow', [UserController::class, 'verificFollow']); //SEGUIR OU DEIXAR DE SEGUIR USUÁRIO
+Route::middleware('auth:api')->get('/user/{id}/follow', [UserController::class, 'verific_follow']); //SEGUIR OU DEIXAR DE SEGUIR USUÁRIO
 Route::middleware('auth:api')->get('/user/{id}/followers', [UserController::class, 'followers']); //LISTA SEGUIDORES
 //FEED
 Route::middleware('auth:api')->post('/feed', [FeedController::class, 'create']); //CRIAR POST AO FEED
 Route::middleware('auth:api')->get('/feed', [FeedController::class, 'read']); //LER POSTS DO FEED
-Route::middleware('auth:api')->get('/feed/updates', [FeedController::class, 'readUpdates']); //LER POSTS DO FEED
-Route::middleware('auth:api')->get('/user/feed', [FeedController::class, 'userFeed']); //VER POSTS DO USUÁRIO LOGADO
-Route::middleware('auth:api')->get('/feed/post/{id}/likes', [FeedController::class, 'readLikes']); //LER POSTS DO FEED
-Route::middleware('auth:api')->post('/feed/delete/', [FeedController::class, 'deletePost']); //LER POSTS DO FEED
-Route::middleware('auth:api')->post('/alert/delete/', [FeedController::class, 'deleteAlert']); //LER POSTS DO FEED
-Route::middleware('auth:api')->post('/feed/comment/delete', [PostController::class, 'deleteComment']);
-Route::middleware('auth:api')->get('/user/{id}/feed', [FeedController::class, 'userFeed']); //VER POSTS DE USUÁRIO ESPECIFICO
+Route::middleware('auth:api')->get('/feed/updates', [FeedController::class, 'read_updates']); //LER POSTS DO FEED
+Route::middleware('auth:api')->get('/user/feed', [FeedController::class, 'user_feed']); //VER POSTS DO USUÁRIO LOGADO
+Route::middleware('auth:api')->get('/feed/post/{id}/likes', [FeedController::class, 'read_likes']); //LER POSTS DO FEED
+Route::middleware('auth:api')->post('/feed/delete/', [FeedController::class, 'delete_post']); //LER POSTS DO FEED
+Route::middleware('auth:api')->post('/alert/delete/', [FeedController::class, 'delete_alert']); //LER POSTS DO FEED
+Route::middleware('auth:api')->post('/feed/comment/delete', [PostController::class, 'delete_comment']);
+Route::middleware('auth:api')->get('/user/{id}/feed', [FeedController::class, 'user_feed']); //VER POSTS DE USUÁRIO ESPECIFICO
 
 
 // FALTA SEPARAR O FEED ENTRE POSTS "NORMAIS" E POSTS QUE SERÃO INTERPRETADOS COMO ALERTA, DE ACORDO COM UMA TAG A SER CRIADA
 // ASSIM SERÃO DOIS FEEDS PRINCIPAIS, DE POSTS NORMAIS E DE POSTS DE ALERTA
 // FALTA MEIO DE MARCAR OS PETS EM FOTOS, GERANDO GALERIA ESPECIFICA PARA CADA PET DE DONOS COM MAIS DE UM  PET
-Route::middleware('auth:api')->post('/user/{id}/pet/{id_pet}/alert', [PetController::class, 'createAlert']); //CADASTRAR PET AO USUÁRIO LOGADO
+Route::middleware('auth:api')->post('/user/{id}/pet/{id_pet}/alert', [PetController::class, 'create_alert']); //CADASTRAR PET AO USUÁRIO LOGADO
 
 //CADASTRO E ATUALIZAÇÃO DE PET
 Route::middleware('auth:api')->post('/user/pet', [PetController::class, 'create']); //CADASTRAR PET AO USUÁRIO LOGADO
 Route::middleware('auth:api')->put('/user/pet/{id_pet}', [PetController::class, 'update']); //ATUALIZAR PET ESPECIFICO DO USUÁRIO LOGADO
-Route::middleware('auth:api')->post('/user/pet/{id_pet}/avatar', [PetController::class, 'updateAvatar']); //ATUALIZAR AVATAR DO PET
-Route::middleware('auth:api')->post('/user/pet/{id_pet}/cover', [PetController::class, 'updateCover']); //ATUALIZAR BACKGROUND DO PERFIL DO PET
+Route::middleware('auth:api')->post('/user/pet/{id_pet}/avatar', [PetController::class, 'update_avatar']); //ATUALIZAR AVATAR DO PET
+Route::middleware('auth:api')->post('/user/pet/{id_pet}/cover', [PetController::class, 'update_cover']); //ATUALIZAR BACKGROUND DO PERFIL DO PET
 //POST
 Route::middleware('auth:api')->post('/post/{id}/like', [PostController::class, 'like']);
 Route::middleware('auth:api')->post('/post/{id}/comment', [PostController::class, 'comment']);

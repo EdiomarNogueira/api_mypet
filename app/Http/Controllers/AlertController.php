@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Alerts;
-use App\Models\Alert_Comment;
+use App\Models\AlertComment;
 use Illuminate\Console\View\Components\Alert;
 use Intervention\Image\Facades\Image;
 
@@ -54,7 +54,7 @@ class AlertController extends Controller
                     }
                 }
 
-                $newCommentAlert = new Alert_Comment();
+                $newCommentAlert = new AlertComment();
                 $newCommentAlert->id_alert = $id;
                 $newCommentAlert->id_user = $this->loggedUser['id'];
                 $newCommentAlert->date_register = date('Y-m-d H:i:s');
@@ -80,12 +80,12 @@ class AlertController extends Controller
         return $array;
     }
 
-    public function positionsAlert($id, $id_pet)
+    public function positions_alert($id, $id_pet)
     {
         $array = ['error' => ''];
 
 
-        $positionsAlert = Alert_Comment::select('latitude', 'longitude', 'photo', 'date_found', 'body')
+        $positionsAlert = AlertComment::select('latitude', 'longitude', 'photo', 'date_found', 'body')
             ->where('id_alert', $id)
             ->where('id_pet', $id_pet)
             ->where('status', 1)
@@ -105,13 +105,13 @@ class AlertController extends Controller
         return $array;
     }
 
-    public function deleteComment(Request $request)
+    public function delete_comment(Request $request)
     {
         $array = ['error' => ''];
         $id_delete = intval($request->input('id_delete'));
         $id_user = intval($request->input('id_user'));
         if ($id_user == $this->loggedUser['id']) {
-            $comment = Alert_Comment::select('*')
+            $comment = AlertComment::select('*')
                 ->where('id_user', $id_user)
                 ->where('id', $id_delete)
                 ->where('status', 1)

@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
-use App\Models\User_Relation;
+use App\Models\UserRelation;
 use App\Models\Post;
 use App\Models\Pet;
 
@@ -148,7 +148,7 @@ class UserController extends Controller
             $user->latitude = $latitude;
             $user->longitude = $longitude;
             //CHAMAR FUNÇÃO DO PETCONTROLLER PASSANDO LATITUDE E LONGITUDE PARA ATUALIZAR O PET
-            $this->updateLocationPet($user->id, $latitude, $longitude);
+            $this->update_location_pet($user->id, $latitude, $longitude);
         } else if (($latitude == null && $longitude) || ($latitude && $longitude == null)) {
             $array['error'] = 'É necessário cadastrar a latitude e a longitude!';
             return $array;
@@ -167,7 +167,7 @@ class UserController extends Controller
         return $array;
     }
 
-    public function updateLocationPet($id_user, $latitude, $longitude)
+    public function update_location_pet($id_user, $latitude, $longitude)
     {
         $petsUser = Pet::select('id')
             ->where('id_user', $id_user)
@@ -181,7 +181,7 @@ class UserController extends Controller
         }
     }
 
-    public function UsersRelations(Request $request, $id_user, $latitude, $longitude)
+    public function users_relations(Request $request, $id_user, $latitude, $longitude)
     {
 
         $me = User::find($this->loggedUser['id']);
@@ -194,8 +194,8 @@ class UserController extends Controller
 
         $list_following = [];
         $list_followers = [];
-        $following = User_Relation::where('user_from', $user->id)->get();
-        $followers = User_Relation::where('user_to', $user->id)->get();
+        $following = UserRelation::where('user_from', $user->id)->get();
+        $followers = UserRelation::where('user_to', $user->id)->get();
 
         if ($following) {
             foreach ($following as $key => $item) {
@@ -265,7 +265,7 @@ class UserController extends Controller
         if ($followers) {
             foreach ($followers as $key => $item) {
                 $followers[$key]->avatar = url('media/avatars_users/' . $followers[$key]->avatar);
-                $verific_follow = $this->verificFollow($followers[$key]->id);
+                $verific_follow = $this->verific_follow($followers[$key]->id);
                 $followers[$key]->isFollowing = $verific_follow['isFollower'];
                 // if (in_array($followers[$key]->id, $list_following)) {
                 //     $followers[$key]->isFollowing = true;
@@ -286,14 +286,14 @@ class UserController extends Controller
         return $array;
     }
 
-    public function UsersRecommended($latitude, $longitude)
+    public function users_recommended($latitude, $longitude)
     {
         $array = ['error' => ''];
         $user = User::find($this->loggedUser['id']);
         $lat = (float)($latitude);
         $lon = (float)($longitude);
         $list_seguidos = [];
-        $seguidos = User_Relation::where('user_from', $user->id)->get();
+        $seguidos = UserRelation::where('user_from', $user->id)->get();
         if ($seguidos) {
             foreach ($seguidos as $key => $item) {
                 $list_seguidos[$key] = $item->user_to;
@@ -320,7 +320,7 @@ class UserController extends Controller
     }
 
 
-    public function updateCover(Request $request)
+    public function update_cover(Request $request)
     {
         $array = ['error' => ''];
         $allowedTypes = ['image/jpg', 'image/jpeg', 'image/png'];
@@ -361,7 +361,7 @@ class UserController extends Controller
         }
         return $array;
     }
-    public function updateAvatar(Request $request)
+    public function update_avatar(Request $request)
     {
         $array = ['error' => ''];
         $allowedTypes = ['image/jpg', 'image/jpeg', 'image/png'];
@@ -427,16 +427,16 @@ class UserController extends Controller
         $dateTo = new \DateTime('today');
         $info['age'] = $dateFrom->diff($dateTo)->y;
 
-        $info['followers'] = User_Relation::where('user_to', $info['id'])->count();
-        $info['following'] = User_Relation::where('user_from', $info['id'])->count();
+        $info['followers'] = UserRelation::where('user_to', $info['id'])->count();
+        $info['following'] = UserRelation::where('user_from', $info['id'])->count();
 
 
         //
 
         $list_following = [];
         $list_followers = [];
-        $following = User_Relation::where('user_from', $id)->get();
-        $followers = User_Relation::where('user_to', $id)->get();
+        $following = UserRelation::where('user_from', $id)->get();
+        $followers = UserRelation::where('user_to', $id)->get();
 
         if ($following) {
             foreach ($following as $key => $item) {
@@ -461,7 +461,7 @@ class UserController extends Controller
             ->where('type', 'photo')
             ->count();
 
-        $hasRelation = User_Relation::where('user_from', $this->loggedUser['id'])
+        $hasRelation = UserRelation::where('user_from', $this->loggedUser['id'])
             ->where('user_to', $info['id'])
             ->count();
 
@@ -471,12 +471,12 @@ class UserController extends Controller
         return $array;
     }
 
-    public function verificFollow($id)
+    public function verific_follow($id)
     {
         $array = ['error' => ''];
         $user = User::find($this->loggedUser['id']);
 
-        $isFollower = User_Relation::where('user_from', $user->id)->where('user_to', $id)->get();
+        $isFollower = UserRelation::where('user_from', $user->id)->where('user_to', $id)->get();
         if (count($isFollower) > 0) {
             $array['isFollower'] = true;
         } else {
@@ -497,7 +497,7 @@ class UserController extends Controller
 
         $userExists = User::find($id);
         if ($userExists) {
-            $relation = User_Relation::where('user_from', $this->loggedUser['id'])
+            $relation = UserRelation::where('user_from', $this->loggedUser['id'])
                 ->where('user_to', $id)
                 ->first();
 
@@ -505,7 +505,7 @@ class UserController extends Controller
                 $relation->delete();
                 $array['relation'] = false;
             } else {
-                $newRelation = new User_Relation();
+                $newRelation = new UserRelation();
                 $newRelation->user_from = $this->loggedUser['id'];
                 $newRelation->user_to = $id;
                 $newRelation->date_register = date('Y-m-d H:i:s');
@@ -525,8 +525,8 @@ class UserController extends Controller
         $userExists = User::find($id);
         if ($userExists) {
 
-            $followers = User_Relation::where('user_to', $id)->get();
-            $following = User_Relation::where('user_from', $id)->get();
+            $followers = UserRelation::where('user_to', $id)->get();
+            $following = UserRelation::where('user_from', $id)->get();
 
             $array['followers'] = [];
             $array['following'] = [];

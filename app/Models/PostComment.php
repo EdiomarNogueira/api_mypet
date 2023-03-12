@@ -5,9 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Vaccine_Card extends Model
+class PostComment extends Model
 {
     public $timestamps = false;
-    protected $tables = "vaccines_card";
+    protected $tables = "post_comments";
 
 }
