@@ -87,7 +87,7 @@ class PostController extends Controller
         $id_delete = intval($request->input('id_delete'));
         $id_user = intval($request->input('id_user'));
         if ($id_user == $this->loggedUser['id']) {
-            $comment = post_comment::select('id')
+            $comment = Post_Comment::select('id')
                 ->where('id_user', $id_user)
                 ->where('id', $id_delete)
                 ->where('status', 1)

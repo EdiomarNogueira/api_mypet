@@ -241,13 +241,13 @@ class FeedController extends Controller
             }
 
             //APAGA LIKES DO POST
-            $likes = post_like::select('*')
+            $likes = Post_Like::select('*')
                 ->where('id_post', $id_delete)
                 ->where('id_user', $id_user)
                 ->get();
 
             //APAGA COMENTÁRIO DO POST
-            $comments = post_comment::select('*')
+            $comments = Post_Comment::select('*')
                 ->where('id_post', $id_delete)
                 ->where('id_user', $id_user)
                 ->get();
