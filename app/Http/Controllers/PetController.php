@@ -357,15 +357,45 @@ class PetController extends Controller
         return $array;
     }
 
-    public function read_alert(Request $request)
+    public function read_alert(Request $request, $encontrado, $perdido, $adocao, $tratamento)
     {
         $array = ['error' => ''];
         $page = 5;
         $perPage = intval($request->input('perPage'));
+
+        $array['encontrado'] = $encontrado;
+        $array['perdido'] = $perdido;
+        $array['adocao'] = $adocao;
+        $array['tratamento'] = $tratamento;
+
+        $filtro = [];
+
+        if (($encontrado == 'true') || ($perdido == 'true') || ($adocao == 'true') || ($tratamento == 'true')) {
+            if ($encontrado == 'true') {
+                $filtro[] = 4;
+            }
+
+            if ($perdido == 'true') {
+                $filtro[] = 3;
+            }
+
+            if ($adocao == 'true') {
+                $filtro[] = 2;
+            }
+
+            if ($tratamento == 'true') {
+                $filtro[] = 6;
+            }
+        } else {
+            $filtro =  [2, 3, 4, 5];
+        }
+
+        $array['filtro'] = $filtro;
+
         $id_user =  $this->loggedUser['id'];
         $Alerts = Alerts::selectRaw('*')
             ->where('marked_users', $id_user)
-            ->whereIn('situation', [2, 3, 4, 5])
+            ->whereIn('situation', $filtro)
             ->limit($perPage)
             ->where('status', 1)
             ->orderBy('date_occurrence', 'desc')
