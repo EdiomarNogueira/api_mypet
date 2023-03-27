@@ -9,6 +9,7 @@ use App\Http\Controllers\PetController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\AlertController;
+use App\Http\Controllers\OngController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -61,6 +62,10 @@ Route::middleware('auth:api')->post('/user/cover', [UserController::class, 'upda
 Route::middleware('auth:api')->get('/user/recommended/{latitude}/{longitude}', [UserController::class, 'users_recommended']); //LER DADOS DO USUÁRIO
 Route::middleware('auth:api')->get('/user/{id_user}/connections/{latitude}/{longitude}', [UserController::class, 'users_relations']); //BUSCA AMIGOS DO USUÁRiO
 Route::middleware('auth:api')->get('/user', [UserController::class, 'read']); //LER DADOS DO USUÁRIO
+
+//
+Route::middleware('auth:api')->get('/ong/pets/{situation}',[OngController::class,'read_pets_ongs']); //BUSCA TODOS OS PETS PARA ADOÇÃO - DE ONGS
+//
 
 //OBTER DADOS DE PET CADASTRADO
 Route::middleware('auth:api')->get('/user/{id}/photos', [FeedController::class, 'user_photos']);  //VER POSTAGENS COM FOTOS
