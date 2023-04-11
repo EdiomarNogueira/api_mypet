@@ -54,6 +54,25 @@ return new class extends Migration
             $table->dateTime('date_change')->nullable();
         });
 
+        Schema::create('alert_comments', function (Blueprint $table) {
+            $table->charset = 'utf8mb4';
+            $table->collation = 'utf8mb4_unicode_ci';
+            $table->id();
+            $table->integer('id_alert');
+            $table->integer('id_user');
+            $table->integer('id_pet');
+            $table->dateTime('date_register');
+            $table->string('road', 200);
+            $table->string('city', 100);
+            $table->string('district', 200);
+            $table->string('photo');
+            $table->text('body');
+            $table->dateTime('date_found');
+            $table->string('latitude', 20)->nullable();
+            $table->string('longitude', 20)->nullable();
+            $table->integer('status')->default('1'); // 1 -> Ativo, 2 -> Desativado
+            $table->dateTime('date_change')->nullable();
+        });
         Schema::create('pets', function (Blueprint $table) {
             $table->charset = 'utf8mb4';
             $table->collation = 'utf8mb4_unicode_ci';
