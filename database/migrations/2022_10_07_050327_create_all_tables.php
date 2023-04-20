@@ -20,6 +20,7 @@ return new class extends Migration
             $table->collation = 'utf8mb4_unicode_ci';
             $table->id();
             $table->integer('category')->default('1'); // 1 -> Usuário padrão, 2 -> ONG
+            $table->integer('confirmed_ong')->default('0'); // 0 -> Ong ainda não verificada, 1-> Ong confirmada -> 2 -> Confirmação de ong negado
             $table->string('email', 100);
             $table->string('phone', 14)->nullable();
             $table->string('password', 200);
@@ -104,7 +105,7 @@ return new class extends Migration
             $table->string('photo');
             $table->integer('id_pet');
             $table->integer('id_user');
-            $table->json('marked_users');
+            // $table->json('marked_users');
             $table->string('tutor_name');
             $table->string('description');
             $table->dateTime('date_occurrence');
@@ -116,7 +117,7 @@ return new class extends Migration
             $table->string('phone', 14);
             $table->string('latitude', 20);
             $table->string('longitude', 20);
-            $table->string('distance');
+            // $table->string('distance');
             $table->integer('status')->default('1'); // 1 -> Ativo, 2 -> Desativado
             $table->dateTime('date_register');
             $table->dateTime('date_change')->nullable();

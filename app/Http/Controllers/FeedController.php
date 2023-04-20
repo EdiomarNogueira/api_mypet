@@ -122,6 +122,15 @@ class FeedController extends Controller
 
         $array['count'] = $count_posts;
 
+        $autor_post = Post::select('id_user')
+            ->whereIn('id_user', $users)
+            ->where('status', 1)
+            ->where('situation', 0)
+            ->orderBy('date_register', 'desc')
+            ->first();
+
+        $array['autor_post'] = $autor_post;
+
         return $array;
     }
 

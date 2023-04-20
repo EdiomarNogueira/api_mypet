@@ -84,45 +84,45 @@ class PetController extends Controller
             return $array;
         }
 
-        $list_recipients = User::select(User::raw('id, SQRT(
-            POW(69.1 * (latitude - ' . $lat . '), 2) +
-            POW(69.1 * (' . $lon . ' - longitude) * COS(latitude / 57.3), 2))*1.609344 AS distance'))
-            ->havingRaw('distance < ?', [10000])
-            ->orderBy('distance', 'ASC')
-            ->get();
+        // $list_recipients = User::select(User::raw('id, SQRT(
+        //     POW(69.1 * (latitude - ' . $lat . '), 2) +
+        //     POW(69.1 * (' . $lon . ' - longitude) * COS(latitude / 57.3), 2))*1.609344 AS distance'))
+        //     ->havingRaw('distance < ?', [10000])
+        //     ->orderBy('distance', 'ASC')
+        //     ->get();
 
-        $array['var'] =  $list_recipients;
-        if (count($list_recipients) == 0) {
-            $array['error'] = 'Não há usuários em um raio de 10km!';
-        }
+        // $array['var'] =  $list_recipients;
+        // if (count($list_recipients) == 0) {
+        //     $array['error'] = 'Não há usuários em um raio de 10km!';
+        // }
 
-        foreach ($list_recipients as $key => $recipient) {
-            $newAlert = new Alerts();
-            $newAlert->photo = $arquive_photo;
-            $newAlert->id_pet = $id_pet;
-            $newAlert->id_user = $id_user;
-            $newAlert->marked_users = $recipient->id;
-            $newAlert->tutor_name = $name;
-            $newAlert->description = $addText;
-            $newAlert->situation = $situation;
-            $newAlert->date_occurrence = $date_occurrence;
-            $newAlert->road = $road;
-            $newAlert->city = $city;
-            $newAlert->district = $district;
-            $newAlert->email = $email;
-            $newAlert->phone = $phone;
-            $newAlert->latitude = $lat;
-            $newAlert->longitude = $lon;
-            $newAlert->distance = $recipient->distance;
-            $newAlert->date_register = date('Y-m-d H:i:s');
-            $newAlert->save();
+        // foreach ($list_recipients as $key => $recipient) {
+        $newAlert = new Alerts();
+        $newAlert->photo = $arquive_photo;
+        $newAlert->id_pet = $id_pet;
+        $newAlert->id_user = $id_user;
+        // $newAlert->marked_users = $recipient->id;
+        $newAlert->tutor_name = $name;
+        $newAlert->description = $addText;
+        $newAlert->situation = $situation;
+        $newAlert->date_occurrence = $date_occurrence;
+        $newAlert->road = $road;
+        $newAlert->city = $city;
+        $newAlert->district = $district;
+        $newAlert->email = $email;
+        $newAlert->phone = $phone;
+        $newAlert->latitude = $lat;
+        $newAlert->longitude = $lon;
+        // $newAlert->distance = $recipient->distance;
+        $newAlert->date_register = date('Y-m-d H:i:s');
+        $newAlert->save();
 
-            $pet = Pet::find($id_pet);
-            $pet->situation = $situation;
-            $pet->date_change = date('Y-m-d H:i:s');
-            $pet->save();
-            $array['success'] = "Alerta gerado!";
-        }
+        $pet = Pet::find($id_pet);
+        $pet->situation = $situation;
+        $pet->date_change = date('Y-m-d H:i:s');
+        $pet->save();
+        $array['success'] = "Alerta gerado!";
+        // }
 
 
         return $array;
@@ -384,7 +384,7 @@ class PetController extends Controller
             }
 
             if ($tratamento == 'true') {
-                $filtro[] = 6;
+                $filtro[] = 5;
             }
         } else {
             $filtro =  [2, 3, 4, 5];
@@ -394,7 +394,7 @@ class PetController extends Controller
 
         $id_user =  $this->loggedUser['id'];
         $Alerts = Alerts::selectRaw('*')
-            ->where('marked_users', $id_user)
+            // ->where('marked_users', $id_user)
             ->whereIn('situation', $filtro)
             ->limit($perPage)
             ->where('status', 1)
