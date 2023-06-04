@@ -24,14 +24,34 @@ class UserController extends Controller
 
 
 
+    public function updatePassword(Request $request)
+    {
+        $array = ['error' => ''];
+        $password = $request->input('password');
+        $password_confirm = $request->input('confirmPassword');
+        $date_change = date('Y-m-d H:i:s');
+        $user = User::find($this->loggedUser['id']);
+        //PASSWORD
+        if ($password && $password_confirm) {
+            if ($password === $password_confirm) {
+                $hash = password_hash($password, PASSWORD_DEFAULT);
+                $user->password = $hash;
+            } else {
+                $array['error'] = 'As senhas não coincidem';
+                return $array;
+            }
+        }
 
+        $array['success'] = "Senha atualizada com sucesso!";
+        $user->save();
+
+        return $array;
+    }
     public function update(Request $request)
     {
         $array = ['error' => ''];
         $name = $request->input('name');
         $email = $request->input('email');
-        $password = $request->input('password');
-        $password_confirm = $request->input('password_confirm');
         $birthdate = $request->input('birthdate');
         $category = $request->input('category');
         $phone = $request->input('phone');
@@ -96,16 +116,7 @@ class UserController extends Controller
             $user->district = $district;
         }
 
-        //PASSWORD
-        if ($password && $password_confirm) {
-            if ($password === $password_confirm) {
-                $hash = password_hash($password, PASSWORD_DEFAULT);
-                $user->password = $hash;
-            } else {
-                $array['error'] = 'As senhas não coincidem';
-                return $array;
-            }
-        }
+
 
         //DATE CHANGE
         if ($date_change) {

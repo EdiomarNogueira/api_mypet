@@ -24,30 +24,23 @@ class PostController extends Controller
         // SE EXISTE
         $postExists = Post::find($id);
         if ($postExists) {
-            $isLiked = PostLike::where('id_post', $id)
-                ->where('id_user', $this->loggedUser['id'])
-                ->count();
-            if ($isLiked > 0) {
+            $like = new PostLike();
+            $isMeLiked = $like->meLike($id, $this->loggedUser['id']);
+            if ($isMeLiked > 0) {
                 // Se já dei like, remove
-                $pl = PostLike::where('id_post', $id)
-                    ->where('id_user', $this->loggedUser['id'])
-                    ->first();
-                $pl->delete();
-
+                $verificLike = $like->verificLike($id, $this->loggedUser['id']);
+                $like->del($verificLike);
                 $array['isLiked'] = False;
             } else {
                 // Se não dei like, adiciona
-                $newPostLike = new PostLike();
-                $newPostLike->id_post = $id;
-                $newPostLike->id_user = $this->loggedUser['id'];
-                $newPostLike->date_register = date('Y-m-d H:i:s');
-                $newPostLike->save();
-
-                $array['isLiked'] = True;
+                if ($like->newLike($id,  $this->loggedUser['id'], date('Y-m-d H:i:s'))) {
+                    $array['isLiked'] = True;
+                } else {
+                    $array = ['error' => 'Erro ao atribuir like'];
+                };
             }
-
-            $likeCount = PostLike::where('id_post', $id)->count();
-            $array['likeCount'] = $likeCount;
+            $countLiked = $like->countLike($id);
+            $array['likeCount'] = $countLiked;
         } else {
             $array['error'] = 'Post não existe!';
             return $array;
@@ -55,31 +48,37 @@ class PostController extends Controller
         return $array;
     }
 
-    public function comment(Request $request, $id)
-    {
-        $array = ['error' => ''];
-        $txt = $request->input('txt');
-        $postExists = Post::find($id);
+    public function comment(Request $request, $id, $parentId = null)
+{
+    $array = ['error' => ''];
+    $txt = $request->input('txt');
+    $postExists = Post::find($id);
 
-        if ($postExists) {
-            if ($txt) {
-                $newComment = new PostComment();
-                $newComment->id_post = $id;
-                $newComment->id_user = $this->loggedUser['id'];
-                $newComment->date_register = date('Y-m-d H:i:s');
-                $newComment->body = $txt;
-                $newComment->save();
-            } else {
-                $array['error'] = 'Não enviou mensagem.';
-                return $array;
+    if ($postExists) {
+        if ($txt) {
+            $newComment = new PostComment();
+            $newComment->id_post = $id;
+            $newComment->id_user = $this->loggedUser['id'];
+            $newComment->date_register = date('Y-m-d H:i:s');
+            $newComment->body = $txt;
+
+            if ($parentId) {
+                $newComment->parent_id = $parentId;
             }
+
+            $newComment->save();
         } else {
-            $array['error'] = 'Post não existe';
+            $array['error'] = 'Não enviou mensagem.';
             return $array;
         }
-
+    } else {
+        $array['error'] = 'Post não existe';
         return $array;
     }
+
+    return $array;
+}
+
 
     public function delete_comment(Request $request)
     {

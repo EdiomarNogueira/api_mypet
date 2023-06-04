@@ -138,7 +138,7 @@ class FeedController extends Controller
     {
         //GET api/feed (page)
         $array = ['error' => ''];
-        $page = 5;
+        $page = 6;
         $perPage = intval($request->input('perPage'));
         //1 - Pegar lista de usuários que EU sigo (incluindo eu mesmo)
         $users = [];
@@ -340,13 +340,31 @@ class FeedController extends Controller
             $postList[$postKey]['liked'] = ($isLiked > 0) ? true : false;
 
             // Preencher informações de COMMENTS
-            $comments = PostComment::where('id_post', $postItem['id'])->get();
+            $comments = PostComment::where('id_post', $postItem['id'])
+                ->whereNull('parent_id')
+                ->get();
+
             foreach ($comments as $commentsKey => $comment) {
                 $user = User::find($comment['id_user']);
                 $user['avatar'] = url('media/avatars_users/' . $user['avatar']);
                 $user['cover'] = url('media/covers_users/' . $user['cover']);
                 $comments[$commentsKey]['user'] = $user;
+
+                // Buscar comentários filhos
+                $childComments = PostComment::where('id_post', $postItem['id'])
+                    ->where('parent_id', $comment['id'])
+                    ->get();
+
+                foreach ($childComments as $childKey => $childComment) {
+                    $childUser = User::find($childComment['id_user']);
+                    $childUser['avatar'] = url('media/avatars_users/' . $childUser['avatar']);
+                    $childUser['cover'] = url('media/covers_users/' . $childUser['cover']);
+                    $childComments[$childKey]['user'] = $childUser;
+                }
+
+                $comments[$commentsKey]['childComments'] = $childComments;
             }
+
             $postList[$postKey]['comments'] = $comments;
 
 

@@ -10,4 +10,6 @@ class Pet extends Model
     public $timestamps = false;
     protected $tables = "pets";
 
+
+
 }

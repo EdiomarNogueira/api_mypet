@@ -10,6 +10,8 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\AlertController;
 use App\Http\Controllers\OngController;
+use App\Http\Controllers\MedicamentPetController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -48,7 +50,6 @@ Route::get('/unauthenticated', function () {
 
 //AUTENTICAÇÃO
 Route::get('/', [AuthController::class, '']); //BUSCAR USUÁRIO LOGADO
-
 Route::post('/user/user_register', [AuthController::class, 'create']); //CRIAR USUÁRIO
 Route::post('/auth/login', [AuthController::class, 'login']); //LOGAR USUÁRIO
 Route::post('/auth/refresh', [AuthController::class, 'refresh']);
@@ -57,11 +58,14 @@ Route::middleware('auth:api')->post('/auth/logout', [AuthController::class, 'log
 Route::middleware('auth:api')->get('/auth/me', [AuthController::class, 'me']); //BUSCAR USUÁRIO LOGADO
 //USUÁRIO
 Route::middleware('auth:api')->put('/user', [UserController::class, 'update']); //ATUALIZAR USUÁRIO
-Route::middleware('auth:api')->post('/user/avatar', [UserController::class, 'update_avatar']); //ATUALIZAR AVATAR
-Route::middleware('auth:api')->post('/user/cover', [UserController::class, 'update_cover']); //ATUALIZAR BACKGROUND DO PERFIL
+Route::middleware('auth:api')->put('/user/password', [UserController::class, 'updatePassword']); //ATUALIZAR USUÁRIO
+
+Route::middleware('auth:api')->post('/user/avatar', [UserController::class, 'update_avatar']);
+Route::middleware('auth:api')->post('/user/cover', [UserController::class, 'update_cover']);
 Route::middleware('auth:api')->get('/user/recommended/{latitude}/{longitude}', [UserController::class, 'users_recommended']); //LER DADOS DO USUÁRIO
 Route::middleware('auth:api')->get('/user/{id_user}/connections/{latitude}/{longitude}', [UserController::class, 'users_relations']); //BUSCA AMIGOS DO USUÁRiO
 Route::middleware('auth:api')->get('/user', [UserController::class, 'read']); //LER DADOS DO USUÁRIO
+Route::middleware('auth:api')->get('/user/pet/{id_pet}/listmedicaments', [MedicamentPetController::class, 'read']); //ATUALIZAR AVATAR DO PET
 
 //
 Route::middleware('auth:api')->get('/ong/pets/{situation}',[OngController::class,'read_pets_ongs']); //BUSCA TODOS OS PETS PARA ADOÇÃO - DE ONGS
@@ -70,16 +74,12 @@ Route::middleware('auth:api')->get('/ong/pets/{situation}',[OngController::class
 //OBTER DADOS DE PET CADASTRADO
 Route::middleware('auth:api')->get('/user/{id}/photos', [FeedController::class, 'user_photos']);  //VER POSTAGENS COM FOTOS
 Route::middleware('auth:api')->get('/user/{id}/photos/pet/{id_pet}', [FeedController::class, 'user_photos_pet']);  //VER POSTAGENS COM FOTOS COM PETS MARCADOS
-
 Route::middleware('auth:api')->get('/user/photos', [FeedController::class, 'user_photos']); //VER FOGOS DO USUÁRIO
 Route::middleware('auth:api')->get('/user/pet', [PetController::class, 'read_me_pet']); //VER TODOS PETS DE USUÁRIO LOGADO ->adicionar avatar
-
 Route::middleware('auth:api')->get('/user/{id}/pet', [PetController::class, 'read_user_pet']); //VER PET ESPECIFICO DE USUÁRIO ESPECIFICO -> adicionar avatar e cover
-
 Route::middleware('auth:api')->get('/user/pet/{id_pet}', [PetController::class, 'read_me_pet']); //VER PET ESPECIFICO DE USUÁRIO LOGADO -> adicionar avatar e cover
 Route::middleware('auth:api')->get('/user/{id}/pet/{id_pet}', [PetController::class, 'read_user_pet']); //VER PET ESPECIFICO DE USUÁRIO ESPECIFICO -> adicionar avatar e cover
-//FEED
-//USUÁRIO
+//ALERT
 Route::middleware('auth:api')->get('/user/alert/{encontrado}/{perdido}/{adocao}/{tratamento}', [PetController::class, 'read_alert']);
 Route::middleware('auth:api')->post('/alert/{id}/comment', [AlertController::class, 'comment']);
 Route::middleware('auth:api')->get('/alert/{id}/pet/{id_pet}/positions', [AlertController::class, 'positions_alert']);
@@ -110,9 +110,11 @@ Route::middleware('auth:api')->post('/user/pet', [PetController::class, 'create'
 Route::middleware('auth:api')->put('/user/pet/{id_pet}', [PetController::class, 'update']); //ATUALIZAR PET ESPECIFICO DO USUÁRIO LOGADO
 Route::middleware('auth:api')->post('/user/pet/{id_pet}/avatar', [PetController::class, 'update_avatar']); //ATUALIZAR AVATAR DO PET
 Route::middleware('auth:api')->post('/user/pet/{id_pet}/cover', [PetController::class, 'update_cover']); //ATUALIZAR BACKGROUND DO PERFIL DO PET
+Route::middleware('auth:api')->post('/user/pet/{id_pet}/medicament', [MedicamentPetController::class, 'create']); //ATUALIZAR AVATAR DO PET
+
 //POST
 Route::middleware('auth:api')->post('/post/{id}/like', [PostController::class, 'like']);
-Route::middleware('auth:api')->post('/post/{id}/comment', [PostController::class, 'comment']);
+Route::middleware('auth:api')->post('/post/{id}/comment/{parentId?}', [PostController::class, 'comment']);
 //BUSCA
 Route::get('/search', [SearchController::class, 'search']);
 

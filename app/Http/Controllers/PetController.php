@@ -418,12 +418,10 @@ class PetController extends Controller
                     $Alerts[$key]->photo = url('media/image_alerts/treatment/' . $Alerts[$key]->photo);
                     break;
             }
-
             $dados_tutor = User::selectRaw('avatar, name')
                 ->where('id', $Alerts[$key]->id_user)
                 ->where('status', 1)
                 ->first();
-
             $Alerts[$key]->avatar_tutor = url('media/avatars_users/' . $dados_tutor->avatar);
             $Alerts[$key]->name_tutor = $dados_tutor->name;
             $Alerts[$key]->distance = number_format($Alerts[$key]->distance, 2, '.', '');
@@ -441,15 +439,24 @@ class PetController extends Controller
             $nascimento = new DateTime($dados_pet->birthdate);
             $intervalo = $nascimento->diff($data_atual);
             if ($dados_pet->birthdate) {
-                if ($intervalo->y > 0 && $intervalo->m > 0) {
-                    $Alerts[$key]->age = $intervalo->y . " anos " . $intervalo->m . " meses ";
-                } else if ($intervalo->y > 0) {
-                    $Alerts[$key]->age = $intervalo->y . " anos ";
-                } else if ($intervalo->m > 0) {
-                    $Alerts[$key]->age = $intervalo->m . " meses ";
+                $string_ano = '';
+                $string_mes = '';
+                $string_dia = '';
+                if($intervalo->y > 1 && $intervalo->y !=0) {
+                    $string_ano = $intervalo->y . " anos e ";
                 } else {
-                    $Alerts[$key]->age =  $intervalo->d . " dias";
+                    $string_ano = $intervalo->y . " ano e ";
                 }
+                if($intervalo->m > 1 && $intervalo->m !=0 ) {
+                    $string_mes = $intervalo->m . " meses";
+                } else {
+                    $string_mes = $intervalo->m . " mês";
+                }
+
+                if($intervalo->y ==0 && $intervalo->m ==0) {
+                    $string_dia = $intervalo->d . " dias";
+                }
+                $Alerts[$key]->age = $string_ano .  $string_mes . $string_dia;
             } else {
                 $Alerts[$key]->age = 'Não estimado';
             }
@@ -510,15 +517,24 @@ class PetController extends Controller
                 $data_atual = new DateTime();
                 $nascimento = new DateTime($dados[0][$key]->birthdate);
                 $intervalo = $nascimento->diff($data_atual);
-                if ($intervalo->y > 0 && $intervalo->m > 0) {
-                    $dados[0][$key]->age = $intervalo->y . " anos " . $intervalo->m . " meses ";
-                } else if ($intervalo->y > 0) {
-                    $dados[0][$key]->age = $intervalo->y . " anos ";
-                } else if ($intervalo->m > 0) {
-                    $dados[0][$key]->age = $intervalo->m . " meses ";
+                $string_ano = '';
+                $string_mes = '';
+                $string_dia = '';
+                if($intervalo->y > 1 && $intervalo->y !=0) {
+                    $string_ano = $intervalo->y . " anos e ";
                 } else {
-                    $dados[0][$key]->age =  $intervalo->d . " dias";
+                    $string_ano = $intervalo->y . " ano e ";
                 }
+                if($intervalo->m > 1 && $intervalo->m !=0 ) {
+                    $string_mes = $intervalo->m . " meses";
+                } else {
+                    $string_mes = $intervalo->m . " mês";
+                }
+
+                if($intervalo->y ==0 && $intervalo->m ==0) {
+                    $string_dia = $intervalo->d . " dias";
+                }
+                $dados[0][$key]->age = $string_ano .  $string_mes . $string_dia;
 
                 $name_tutor =  User::select('name')
                     ->where('id', $dados[0][$key]->id_user)
@@ -588,15 +604,24 @@ class PetController extends Controller
                 $data_atual = new DateTime();
                 $nascimento = new DateTime($dados[0][$key]->birthdate);
                 $intervalo = $nascimento->diff($data_atual);
-                if ($intervalo->y > 0 && $intervalo->m > 0) {
-                    $dados[0][$key]->age = $intervalo->y . " anos " . $intervalo->m . " meses ";
-                } else if ($intervalo->y > 0) {
-                    $dados[0][$key]->age = $intervalo->y . " anos ";
-                } else if ($intervalo->m > 0) {
-                    $dados[0][$key]->age = $intervalo->m . " meses ";
+                $string_ano = '';
+                $string_mes = '';
+                $string_dia = '';
+                if($intervalo->y > 1 && $intervalo->y !=0) {
+                    $string_ano = $intervalo->y . " anos e ";
                 } else {
-                    $dados[0][$key]->age =  $intervalo->d . " dias";
+                    $string_ano = $intervalo->y . " ano e ";
                 }
+                if($intervalo->m > 1 && $intervalo->m !=0 ) {
+                    $string_mes = $intervalo->m . " meses";
+                } else {
+                    $string_mes = $intervalo->m . " mês";
+                }
+
+                if($intervalo->y ==0 && $intervalo->m ==0) {
+                    $string_dia = $intervalo->d . " dias";
+                }
+                $dados[0][$key]->age = $string_ano .  $string_mes . $string_dia;
 
                 $name_tutor =  User::select('name')
                     ->where('id', $dados[0][$key]->id_user)

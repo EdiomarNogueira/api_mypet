@@ -23,10 +23,14 @@ class OngController extends Controller
     public function read_pets_ongs(Request $request, $situation)
     {
         $array = ['error' => ''];
-        $ids_pets = Pet::selectRaw('id')
-            ->where('situation', $situation)
-            ->where('status', 1)
-            ->get();
+        $ids_pets = Pet::selectRaw('pets.id')
+        ->join('users', 'pets.id_user', '=', 'users.id')
+        ->where('pets.situation', $situation)
+        ->where('pets.status', 1)
+        ->where('users.category', 2)
+        // ->where('users.confirmed_ong', 1)
+        ->distinct()
+        ->get();
         if (!isset($ids_pets[0])) {
             $array['error'] = 'Não há pets para adoção cadastrados por ongs';
             return $array;
@@ -67,15 +71,46 @@ class OngController extends Controller
                 $data_atual = new DateTime();
                 $nascimento = new DateTime($dados[0][$key]->birthdate);
                 $intervalo = $nascimento->diff($data_atual);
-                if ($intervalo->y > 0 && $intervalo->m > 0) {
-                    $dados[0][$key]->age = $intervalo->y . " anos " . $intervalo->m . " meses ";
-                } else if ($intervalo->y > 0) {
-                    $dados[0][$key]->age = $intervalo->y . " anos ";
-                } else if ($intervalo->m > 0) {
-                    $dados[0][$key]->age = $intervalo->m . " meses ";
+
+                $string_ano = '';
+                $string_mes = '';
+                $string_dia = '';
+                if($intervalo->y > 1 && $intervalo->y !=0) {
+                    $string_ano = $intervalo->y . " anos e ";
                 } else {
-                    $dados[0][$key]->age =  $intervalo->d . " dias";
+                    $string_ano = $intervalo->y . " ano e ";
                 }
+                if($intervalo->m > 1 && $intervalo->m !=0 ) {
+                    $string_mes = $intervalo->m . " meses";
+                } else {
+                    $string_mes = $intervalo->m . " mês";
+                }
+
+                if($intervalo->y ==0 && $intervalo->m ==0) {
+                    $string_dia = $intervalo->d . " dias";
+                }
+                $dados[0][$key]->age = $string_ano .  $string_mes . $string_dia;
+                // if ($intervalo->y > 0 && $intervalo->m > 0) {
+                //     if($intervalo->y >1) {
+                //         if( $intervalo->m > 1) {
+                //             $dados[0][$key]->age = $intervalo->y . " anos e " . $intervalo->m . " meses ";
+                //         } else {
+                //             $dados[0][$key]->age = $intervalo->y . " ano e " . $intervalo->m . " mês ";
+                //         }
+                //     } else {
+                //         if( $intervalo->m > 1) {
+                //             $dados[0][$key]->age = $intervalo->y . " ano e " . $intervalo->m . " meses ";
+                //         } else {
+                //             $dados[0][$key]->age = $intervalo->y . " ano e um" . $intervalo->m . " mês ";
+                //         }
+                //     }
+                // } else if ($intervalo->y > 0) {
+                //     $dados[0][$key]->age = $intervalo->y . " anos ";
+                // } else if ($intervalo->m > 0) {
+                //     $dados[0][$key]->age = $intervalo->m . " meses ";
+                // } else {
+                //     $dados[0][$key]->age =  $intervalo->d . " dias";
+                // }
 
                 $name_tutor =  User::select('name')
                     ->where('id', $dados[0][$key]->id_user)

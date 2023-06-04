@@ -8,6 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class VaccineCard extends Model
 {
     public $timestamps = false;
-    protected $tables = "vaccines_card";
+    protected $tables = "vaccine_cards";
 
 }

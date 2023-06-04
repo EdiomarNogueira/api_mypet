@@ -169,14 +169,20 @@ return new class extends Migration
             $table->integer('status')->default('1'); // 1 -> Ativo, 2 -> Desativado
             $table->dateTime('date_register');
             $table->dateTime('date_change')->nullable();
+            $table->integer('parent_id')->nullable(); // Adicione essa coluna para armazenar o ID do comentário pai
         });
 
-        Schema::create('vaccines_card', function (Blueprint $table) {
+        Schema::create('vaccine_cards', function (Blueprint $table) {
             $table->charset = 'utf8mb4';
             $table->collation = 'utf8mb4_unicode_ci';
             $table->id();
+            $table->integer('id_user');
             $table->integer('id_pet');
             $table->integer('status')->default('1'); // 1 -> Ativo, 2 -> Desativado
+            $table->integer('type');
+            $table->text('name',244)->nullable();
+            $table->text('recommendation',244);
+            $table->date('application_date');
             $table->dateTime('date_register');
             $table->dateTime('date_change')->nullable();
         });
