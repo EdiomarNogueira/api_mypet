@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 
 
-class authController extends Controller
+class AuthController extends Controller
 {
 
     public function __construct()
