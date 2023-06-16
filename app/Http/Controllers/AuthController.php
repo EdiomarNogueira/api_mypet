@@ -49,18 +49,9 @@ class AuthController extends Controller
         $birthdate = $request->input('birthdate');
         $category = $request->input('category');
         $phone = $request->input('phone');
-
+        $newUser = User::createUser($name, $email, $password, $birthdate, $category, $phone);
         //CRIANDO NOVO USUÁRIO
-        $newUser = new User();
-        $newUser->name = $name;
-        $newUser->email = $email;
-        $newUser->password = password_hash($password, PASSWORD_DEFAULT);
-        $newUser->birthdate = date('Y-m-d', strtotime($birthdate));
-        $newUser->category = $category;
-        $newUser->phone = $phone;
-        $newUser->date_register = date('Y-m-d H:i:s');
-        //$newUser->token = '';
-        $newUser->save();
+
 
         //LOGAR USUÁRIO RECEM CRIADO
         $token = Auth::login($newUser);
@@ -112,7 +103,7 @@ class AuthController extends Controller
         $array = ['error' => ''];
         $user = Auth::user();
 
-        $array['id'] =$user->id;
+        $array['id'] = $user->id;
         $array['name'] = $user->name;
         $array['phone'] = $user->phone;
         $array['email'] = $user->email;
@@ -142,7 +133,8 @@ class AuthController extends Controller
         //
     }
 
-    public function validate_token() {
+    public function validate_token()
+    {
         $user = Auth::user();
         $array['data'] = [
             'user' => [

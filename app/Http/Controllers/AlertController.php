@@ -5,12 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Alerts;
 use App\Models\AlertComment;
-use Illuminate\Console\View\Components\Alert;
 use Intervention\Image\Facades\Image;
 
 class AlertController extends Controller
 {
-    //
     private $loggedUser;
 
     public function __construct()
@@ -34,12 +32,11 @@ class AlertController extends Controller
         $photo = $request->file('photo');
         $photo_alert = '';
         $alertExists = Alerts::find($id);
+
         if ($alertExists) {
             if ($addText) {
-
                 if ($photo) {
                     if (in_array($photo->getClientMimeType(), $allowedTypes)) {
-
                         $filename = md5(time() . rand(0, 9999)) . '.jpg';
                         $destPath = public_path('/media/image_comment_alerts');
 
@@ -47,27 +44,13 @@ class AlertController extends Controller
                             ->resize(800, null, function ($constraint) {
                                 $constraint->aspectRatio();
                             })
-
                             ->save($destPath . '/' . $filename);
 
                         $photo_alert = $filename;
                     }
                 }
 
-                $newCommentAlert = new AlertComment();
-                $newCommentAlert->id_alert = $id;
-                $newCommentAlert->id_user = $this->loggedUser['id'];
-                $newCommentAlert->date_register = date('Y-m-d H:i:s');
-                $newCommentAlert->city = $city;
-                $newCommentAlert->road = $road;
-                $newCommentAlert->photo = $photo_alert;
-                $newCommentAlert->district = $district;
-                $newCommentAlert->body = $addText;
-                $newCommentAlert->date_found = $date_found;
-                $newCommentAlert->latitude = $latitude;
-                $newCommentAlert->longitude = $longitude;
-                $newCommentAlert->id_pet = $alertExists->id_pet;
-                $newCommentAlert->save();
+                $alertExists->addComment($this->loggedUser['id'], $addText, $city, $road, $photo_alert, $district, $date_found, $latitude, $longitude);
             } else {
                 $array['error'] = 'Não enviou mensagem.';
                 return $array;
@@ -83,25 +66,17 @@ class AlertController extends Controller
     public function positions_alert($id, $id_pet)
     {
         $array = ['error' => ''];
+        $alertComments = AlertComment::getPositions($id, $id_pet);
 
-
-        $positionsAlert = AlertComment::select('latitude', 'longitude', 'photo', 'date_found', 'body')
-            ->where('id_alert', $id)
-            ->where('id_pet', $id_pet)
-            ->where('status', 1)
-            ->where('latitude', '!=', NULL)
-            ->where('longitude', '!=', NULL)
-            ->orderby('date_found', 'desc')
-            ->get();
-
-        if ($positionsAlert) {
-            foreach ($positionsAlert as $key => $position) {
-                if ($positionsAlert[$key]->photo != '' && $positionsAlert[$key]->photo != NULL) {
-                    $positionsAlert[$key]->photo = url('media/image_comment_alerts/' . $positionsAlert[$key]->photo);
+        if ($alertComments) {
+            foreach ($alertComments as $key => $comment) {
+                if ($alertComments[$key]->photo != '' && $alertComments[$key]->photo != NULL) {
+                    $alertComments[$key]->photo = url('media/image_comment_alerts/' . $alertComments[$key]->photo);
                 }
             }
         }
-        $array['positionsAlert'] = $positionsAlert;
+
+        $array['positionsAlert'] = $alertComments;
         return $array;
     }
 
@@ -110,12 +85,9 @@ class AlertController extends Controller
         $array = ['error' => ''];
         $id_delete = intval($request->input('id_delete'));
         $id_user = intval($request->input('id_user'));
+
         if ($id_user == $this->loggedUser['id']) {
-            $comment = AlertComment::select('*')
-                ->where('id_user', $id_user)
-                ->where('id', $id_delete)
-                ->where('status', 1)
-                ->first();
+            $comment = AlertComment::getComment($id_user, $id_delete);
 
             if ($comment) {
                 $comment->delete();

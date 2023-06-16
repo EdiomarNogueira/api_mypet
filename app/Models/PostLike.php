@@ -18,6 +18,34 @@ class PostLike extends Model
         return $isLiked;
     }
 
+    public static function selectPostLikeId($id)
+    {
+        $likes = PostLike::where('id_post', $id)
+            ->where('status', 1)
+            ->get();
+        return $likes;
+    }
+
+    public static function selectPostLike($id_delete, $id_user)
+    {
+        $likes = PostLike::select('*')
+            ->where('id_post', $id_delete)
+            ->where('id_user', $id_user)
+            ->get();
+        return $likes;
+    }
+
+    public static function selectPostLikeStatus($id_post, $id_user)
+    {
+        $isLiked = PostLike::where('id_post', $id_post)
+            ->where('id_user', $id_user)
+            ->where('status', 1)
+            ->count();
+        return $isLiked;
+    }
+
+
+
     public function countLike($id)
     {
         $countLiked = PostLike::where('id_post', $id)
@@ -44,11 +72,10 @@ class PostLike extends Model
         $newPostLike->id_post = $id;
         $newPostLike->id_user = $id_user;
         $newPostLike->date_register = $date;
-        if($newPostLike->save()){
+        if ($newPostLike->save()) {
             return true;
         } else {
             return false;
         };
-
     }
 }

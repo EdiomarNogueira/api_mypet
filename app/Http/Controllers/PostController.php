@@ -9,7 +9,6 @@ use App\Models\PostComment;
 
 class PostController extends Controller
 {
-    //
     private $loggedUser;
 
     public function __construct()
@@ -21,82 +20,80 @@ class PostController extends Controller
     public function like($id)
     {
         $array = ['error' => ''];
-        // SE EXISTE
         $postExists = Post::find($id);
+
         if ($postExists) {
             $like = new PostLike();
             $isMeLiked = $like->meLike($id, $this->loggedUser['id']);
+
             if ($isMeLiked > 0) {
                 // Se já dei like, remove
                 $verificLike = $like->verificLike($id, $this->loggedUser['id']);
                 $like->del($verificLike);
-                $array['isLiked'] = False;
+                $array['isLiked'] = false;
             } else {
                 // Se não dei like, adiciona
                 if ($like->newLike($id,  $this->loggedUser['id'], date('Y-m-d H:i:s'))) {
-                    $array['isLiked'] = True;
+                    $array['isLiked'] = true;
                 } else {
                     $array = ['error' => 'Erro ao atribuir like'];
-                };
+                }
             }
+
             $countLiked = $like->countLike($id);
             $array['likeCount'] = $countLiked;
         } else {
             $array['error'] = 'Post não existe!';
             return $array;
         }
+
         return $array;
     }
 
     public function comment(Request $request, $id, $parentId = null)
-{
-    $array = ['error' => ''];
-    $txt = $request->input('txt');
-    $postExists = Post::find($id);
+    {
+        $array = ['error' => ''];
+        $txt = $request->input('txt');
+        $postExists = Post::find($id);
 
-    if ($postExists) {
-        if ($txt) {
-            $newComment = new PostComment();
-            $newComment->id_post = $id;
-            $newComment->id_user = $this->loggedUser['id'];
-            $newComment->date_register = date('Y-m-d H:i:s');
-            $newComment->body = $txt;
+        if ($postExists) {
+            if ($txt) {
+                $post = new Post();
+                $newComment = $post->createComment($id, $this->loggedUser['id'], $txt, $parentId);
 
-            if ($parentId) {
-                $newComment->parent_id = $parentId;
+                if ($newComment) {
+                    $array['comment'] = $newComment;
+                } else {
+                    $array['error'] = 'Erro ao adicionar comentário.';
+                }
+            } else {
+                $array['error'] = 'Não enviou mensagem.';
+                return $array;
             }
-
-            $newComment->save();
         } else {
-            $array['error'] = 'Não enviou mensagem.';
+            $array['error'] = 'Post não existe';
             return $array;
         }
-    } else {
-        $array['error'] = 'Post não existe';
+
         return $array;
     }
-
-    return $array;
-}
-
 
     public function delete_comment(Request $request)
     {
         $array = ['error' => ''];
         $id_delete = intval($request->input('id_delete'));
         $id_user = intval($request->input('id_user'));
-        if ($id_user == $this->loggedUser['id']) {
-            $comment = PostComment::select('id')
-                ->where('id_user', $id_user)
-                ->where('id', $id_delete)
-                ->where('status', 1)
-                ->first();
 
-            if ($comment) {
-                $comment->delete();
+        if ($id_user == $this->loggedUser['id']) {
+            $post = new Post();
+            $result = $post->deleteComment($id_delete, $id_user);
+            if ($result) {
+                $array['message'] = 'Comentário removido com sucesso.';
+            } else {
+                $array['error'] = 'Erro ao remover comentário.';
             }
         } else {
-            $array['error'] = "Autor do comentário incompatível com autor da requisição";
+            $array['error'] = 'Autor do comentário incompatível com autor da requisição.';
         }
 
         return $array;

@@ -81,16 +81,8 @@ class FeedController extends Controller
             }
 
             if ($body) {
-                $newPost = new Post();
-                $newPost->id_user = $this->loggedUser['id'];
-                $newPost->type = $type;
-                $newPost->date_register = date('Y-m-d H:i:s');
-                $newPost->body = $body;
-                $newPost->marked_pets = $pets;
-                if ($newPost->type == 'photo') {
-                    $newPost->subtitle = $subtitle;
-                }
-                $newPost->save();
+                Post::createPost($this->loggedUser['id'], $type, date('Y-m-d H:i:s'), $body, $pets, $subtitle);
+
                 //Event::dispatch(new NewPost($newPost, 'user'.$this->loggedUser['id']));
             }
         } else {
@@ -105,8 +97,6 @@ class FeedController extends Controller
         //count em posts
         //count em mensagens em posts
         //count em likes em posts
-
-        //retornar valores
         $array = ['error' => ''];
         $users = [];
         $userList = UserRelation::Where('user_from', $this->loggedUser['id'])->get();
@@ -115,20 +105,10 @@ class FeedController extends Controller
         }
 
         $users[] = $this->loggedUser['id'];
-        $count_posts = Post::whereIn('id_user', $users)
-            ->where('status', 1)
-            ->where('situation', 0)
-            ->get()->count();
+        $count_posts = Post::countPosts($users);
 
         $array['count'] = $count_posts;
-
-        $autor_post = Post::select('id_user')
-            ->whereIn('id_user', $users)
-            ->where('status', 1)
-            ->where('situation', 0)
-            ->orderBy('date_register', 'desc')
-            ->first();
-
+        $autor_post = Post::autorPost($users);
         $array['autor_post'] = $autor_post;
 
         return $array;
@@ -149,15 +129,10 @@ class FeedController extends Controller
 
         $users[] = $this->loggedUser['id'];
         //2 - Pegar os posts ordenado pela data
-        $postList = Post::whereIn('id_user', $users)
-            ->where('status', 1)
-            ->where('situation', 0)
-            ->orderBy('date_register', 'desc')
-            //->offset($page * $perPage)
-            ->limit($perPage)
-            ->get();
+        $postList = Post::postList($users, $perPage);
 
-        $total = Post::whereIn('id_user', $users)->count();
+
+        // $total = Post::whereIn('id_user', $users)->count();
         $pageCount = ceil($perPage);
 
         //3 - Preencher as informações adicionais
@@ -179,17 +154,9 @@ class FeedController extends Controller
         $id_pet = intval($request->input('id_pet'));
         $filename = null;
 
-        $alerts = Alerts::select('*')
-            ->where('id_user', $id_user)
-            ->where('id_pet', $id_pet)
-            ->where('situation', $situation)
-            ->where('status', 1)
-            ->get();
-
-
+        $alerts = Alerts::selectAlerts($id_user, $id_pet, $situation);
         //BUSCAR TODOS COMENTÁRIOS DO ALERTA E DELETAR
         //BUSCAR IMAGENS DE COMENTÁRIOS DE ALERTA E APAGAR
-
         foreach ($alerts as $alert) {
             if ($alert) {
                 $filename = $alert->photo;
@@ -234,11 +201,7 @@ class FeedController extends Controller
         $filename = null;
 
         if ($id_user == $this->loggedUser['id']) {
-            $post = Post::select('*')
-                ->where('id_user', $id_user)
-                ->where('id', $id_delete)
-                ->where('status', 1)
-                ->first();
+            $post = Post::selectPost($id_user, $id_delete);
         } else {
             $array['error'] = "Autor do post incompatível com autor da requisição";
         }
@@ -248,18 +211,10 @@ class FeedController extends Controller
             if ($post->type == 'photo') {
                 $filename = $post->body;
             }
-
             //APAGA LIKES DO POST
-            $likes = PostLike::select('*')
-                ->where('id_post', $id_delete)
-                ->where('id_user', $id_user)
-                ->get();
-
+            $likes = PostLike::selectPostLike($id_delete, $id_user);
             //APAGA COMENTÁRIO DO POST
-            $comments = PostComment::select('*')
-                ->where('id_post', $id_delete)
-                ->where('id_user', $id_user)
-                ->get();
+            $comments = PostComment::selectPostComment($id_delete, $id_user);
 
             if ($comments) {
                 foreach ($comments as $item) {
@@ -292,12 +247,8 @@ class FeedController extends Controller
         $array = ['error' => ''];
         // $id_post = intval($request->input('id_post'));
 
-        $likes = PostLike::where('id_post', $id)
-            ->where('status', 1)
-            ->get();
-
+        $likes = PostLike::selectPostLikeId($id);
         $array['liked'] = false;
-
         foreach ($likes as $key => $like) {
             if ($like->id_user == $this->loggedUser['id']) {
                 $array['liked'] = true;
@@ -312,9 +263,6 @@ class FeedController extends Controller
 
     private function _postListToObject($postList, $loggedId)
     {
-
-
-
         foreach ($postList as $postKey => $postItem) {
 
             //VERIFICA SE O POST É MEU
@@ -333,10 +281,8 @@ class FeedController extends Controller
             $likes = PostLike::where('id_post', $postItem['id'])->where('status', 1)->count();
             $postList[$postKey]['likeCount'] = $likes;
 
-            $isLiked = PostLike::where('id_post', $postItem['id'])
-                ->where('id_user', $loggedId)
-                ->where('status', 1)
-                ->count();
+            $isLiked = PostLike::selectPostLikeStatus($postItem['id'], $loggedId, 1);
+
             $postList[$postKey]['liked'] = ($isLiked > 0) ? true : false;
 
             // Preencher informações de COMMENTS
