@@ -317,7 +317,7 @@ class UserController extends Controller
             POW(69.1 * (' . $lon . ' - longitude) * COS(latitude / 57.3), 2))*1.6 AS distance'))
             ->where('id', '!=', $user->id)
             ->whereNotIn('id', $list_seguidos)
-            //->havingRaw('distance < ?', [5])
+            ->havingRaw('distance < ?', [5])
             ->orderBy('distance', 'ASC')
             ->get();
 

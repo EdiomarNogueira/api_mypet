@@ -77,15 +77,35 @@ class Alerts extends Model
         return $alerts;
     }
 
-    public static function selectListAlerts($filtro, $perPage)
+    public static function selectListAlerts($filtro, $perPage, $id_user)
     {
-        $Alerts = Alerts::selectRaw('*')
-            // ->where('marked_users', $id_user)
+        $coodenadas = User::selectCoornadsUser($id_user);
+        $latitude = $coodenadas[0]->latitude ?? null;
+        $longitude = $coodenadas[0]->longitude ?? null;
+
+        $alerts = Alerts::selectRaw('*,
+    SQRT(
+        POW(69.1 * (latitude - ?), 2) +
+        POW(69.1 * (? - longitude) * COS(latitude / 57.3), 2)
+    ) * 1.6 AS distance', [$latitude, $longitude])
             ->whereIn('situation', $filtro)
             ->limit($perPage)
             ->where('status', 1)
+            ->havingRaw('distance < ?', [5])
+            ->orderBy('distance', 'ASC')
             ->orderBy('date_occurrence', 'desc')
             ->get();
-        return $Alerts;
+
+        if ($alerts->isEmpty()) {
+            $alerts = Alerts::selectRaw('*')
+                // ->where('marked_users', $id_user)
+                ->whereIn('situation', $filtro)
+                ->limit($perPage)
+                ->where('status', 1)
+                ->orderBy('date_occurrence', 'desc')
+                ->get();
+        }
+
+        return $alerts;
     }
 }

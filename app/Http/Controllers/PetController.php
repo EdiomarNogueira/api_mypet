@@ -312,7 +312,9 @@ class PetController extends Controller
         $array['filtro'] = $filtro;
 
         $id_user =  $this->loggedUser['id'];
-        $Alerts = Alerts::selectListAlerts($filtro, $perPage);
+        $Alerts = Alerts::selectListAlerts($filtro, $perPage, $id_user);
+        // $array['TESTE DE DISTANCIA'] = $Alerts;
+        // return $array;
         foreach ($Alerts as $key => $alert) {
             switch ($Alerts[$key]->situation) {
                 case 2:

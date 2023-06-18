@@ -71,4 +71,13 @@ class User extends Authenticatable implements JWTSubject
             ->first();
         return $name_tutor;
     }
+
+    public static function selectCoornadsUser($id_user)
+    {
+        $coordenadas[] = User::select('latitude', 'longitude')
+            ->where('id', $id_user)
+            ->where('status', 1)
+            ->first();
+        return $coordenadas;
+    }
 }
