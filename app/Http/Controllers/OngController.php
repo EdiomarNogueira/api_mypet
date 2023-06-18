@@ -23,14 +23,8 @@ class OngController extends Controller
     public function read_pets_ongs(Request $request, $situation)
     {
         $array = ['error' => ''];
-        $ids_pets = Pet::selectRaw('pets.id')
-        ->join('users', 'pets.id_user', '=', 'users.id')
-        ->where('pets.situation', $situation)
-        ->where('pets.status', 1)
-        ->where('users.category', 2)
-        // ->where('users.confirmed_ong', 1)
-        ->distinct()
-        ->get();
+        $ids_pets = Pet::selectIdsPets($situation);
+
         if (!isset($ids_pets[0])) {
             $array['error'] = 'Não há pets para adoção cadastrados por ongs';
             return $array;
@@ -45,14 +39,8 @@ class OngController extends Controller
         $perPage = 40;
 
         // foreach ($pets as $key => $pet) {
-        $dados[] = Pet::selectRaw('*')
-            ->where('situation', $situation)
-            ->whereIn('id', $pets)
-            // ->where('id', $pet)
-            ->offset($page * $perPage)
-            ->limit($perPage)
-            ->where('status', 1)
-            ->get();
+        $dados = Pet::selectDadosPetsOngs($situation, $pets, $page, $perPage);
+
         if (count($dados[0]) == 0) {
             $array['error'] = 'Pet não encontrado';
             return $array;
@@ -75,18 +63,18 @@ class OngController extends Controller
                 $string_ano = '';
                 $string_mes = '';
                 $string_dia = '';
-                if($intervalo->y > 1 && $intervalo->y !=0) {
+                if ($intervalo->y > 1 && $intervalo->y != 0) {
                     $string_ano = $intervalo->y . " anos e ";
                 } else {
                     $string_ano = $intervalo->y . " ano e ";
                 }
-                if($intervalo->m > 1 && $intervalo->m !=0 ) {
+                if ($intervalo->m > 1 && $intervalo->m != 0) {
                     $string_mes = $intervalo->m . " meses";
                 } else {
                     $string_mes = $intervalo->m . " mês";
                 }
 
-                if($intervalo->y ==0 && $intervalo->m ==0) {
+                if ($intervalo->y == 0 && $intervalo->m == 0) {
                     $string_dia = $intervalo->d . " dias";
                 }
                 $dados[0][$key]->age = $string_ano .  $string_mes . $string_dia;
@@ -111,13 +99,7 @@ class OngController extends Controller
                 // } else {
                 //     $dados[0][$key]->age =  $intervalo->d . " dias";
                 // }
-
-                $name_tutor =  User::select('name')
-                    ->where('id', $dados[0][$key]->id_user)
-                    // ->offset($page * $perPage)
-                    // ->limit($perPage)
-                    ->where('status', 1)
-                    ->first();
+                $name_tutor =  User::selectName($dados[0][$key]->id_user);
                 $dados[0][$key]->tutor_name = $name_tutor->name;
             }
         }

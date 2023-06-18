@@ -235,7 +235,6 @@ class FeedController extends Controller
             }
 
             $post->delete();
-
             $array['success'] = "Post Deletado.";
         }
 
@@ -245,8 +244,6 @@ class FeedController extends Controller
     public function read_likes($id)
     {
         $array = ['error' => ''];
-        // $id_post = intval($request->input('id_post'));
-
         $likes = PostLike::selectPostLikeId($id);
         $array['liked'] = false;
         foreach ($likes as $key => $like) {
@@ -278,41 +275,29 @@ class FeedController extends Controller
             $userInfo['cover'] = url('media/covers_users/' . $userInfo['cover']);
             $postList[$postKey]['user'] = $userInfo;
             // Preencher informações de LIKE
-            $likes = PostLike::where('id_post', $postItem['id'])->where('status', 1)->count();
+            $likes = PostLike::selectPostLikeStatus($postItem['id'], 1);
             $postList[$postKey]['likeCount'] = $likes;
-
-            $isLiked = PostLike::selectPostLikeStatus($postItem['id'], $loggedId, 1);
-
+            $isLiked = PostLike::selectPostLikeUserStatus($postItem['id'], $loggedId, 1);
             $postList[$postKey]['liked'] = ($isLiked > 0) ? true : false;
-
             // Preencher informações de COMMENTS
-            $comments = PostComment::where('id_post', $postItem['id'])
-                ->whereNull('parent_id')
-                ->get();
-
+            $comments = PostComment::selectInforComment($postItem['id']);
             foreach ($comments as $commentsKey => $comment) {
                 $user = User::find($comment['id_user']);
                 $user['avatar'] = url('media/avatars_users/' . $user['avatar']);
                 $user['cover'] = url('media/covers_users/' . $user['cover']);
                 $comments[$commentsKey]['user'] = $user;
-
                 // Buscar comentários filhos
-                $childComments = PostComment::where('id_post', $postItem['id'])
-                    ->where('parent_id', $comment['id'])
-                    ->get();
-
+                $childComments = PostComment::selectChildComments($postItem['id'], $comment['id']);
                 foreach ($childComments as $childKey => $childComment) {
                     $childUser = User::find($childComment['id_user']);
                     $childUser['avatar'] = url('media/avatars_users/' . $childUser['avatar']);
                     $childUser['cover'] = url('media/covers_users/' . $childUser['cover']);
                     $childComments[$childKey]['user'] = $childUser;
                 }
-
                 $comments[$commentsKey]['childComments'] = $childComments;
             }
 
             $postList[$postKey]['comments'] = $comments;
-
 
             if ($postItem['type'] == 'photo') {
                 $postItem['body'] = url('media/uploads/' . $postItem['body']);
@@ -322,20 +307,16 @@ class FeedController extends Controller
                 //var_dump('item', $postItem->marked_pets);
                 $array_pets = json_decode($postItem->marked_pets);
                 $postList[$postKey]['marked_pets'] = [];
-                $name_pets = [];
+                $pets = [];
                 if ($array_pets) {
                     foreach ($array_pets as $key => $pets_id) {
                         if ($pets_id != null) {
-
-
-                            $pet_marked = Pet::select('name')
-                                ->where('id', $pets_id)
-                                ->where('status', 1)
-                                ->get();
-                            $name_pets[$key] = $pet_marked[0]->name;
+                            $pet_marked = Pet::selectPetMarked($pets_id);
+                            $pets[$key]['name'] = $pet_marked[0]->name;
+                            $pets[$key]['id_pet'] = $pets_id;
                         }
                     }
-                    $postList[$postKey]['marked_pets'] = $name_pets;
+                    $postList[$postKey]['marked_pets'] = $pets;
                 }
             }
         }
@@ -351,27 +332,17 @@ class FeedController extends Controller
         if ($id == false) {
             $id = $this->loggedUser['id'];
         }
-
         $page = intval($request->input('page'));
         $perPage = 4;
-
         // Pegar os posts do usuário ordenado pela data
-        $postList = Post::where('id_user', $id)
-            ->orderBy('date_register', 'desc')
-            ->offset($page * $perPage)
-            ->limit($perPage)
-            ->get();
-
-        $total = Post::where('id_user', $id)->count();
+        $postList = Post::selectPostList($id, $page, $perPage);
+        $total = Post::countTotalPosts($id);
         $pageCount = ceil($total / $perPage);
-
         // Preencher as informações adicionais
         $posts = $this->_postListToObject($postList, $this->loggedUser['id']);
-
         $array['posts'] = $posts;
         $array['pageCount'] = $pageCount;
         $array['currentPage'] = $page;
-
         return $array;
     }
 
@@ -389,20 +360,9 @@ class FeedController extends Controller
 
         // Pegar as fotos do usuário ordenado pela data
         if ($id_pet) {
-            $postList = Post::where('id_user', $id)
-                ->where('type', 'photo')
-                ->whereJsonContains('marked_pets', $id_pet)
-                ->orderBy('date_register', 'desc')
-                //->offset($page * $perPage)
-                ->limit($perPage)
-                ->get();
+            $postList = Post::postListPhotoMarkedPet($id, $id_pet, $perPage);
         } else {
-            $postList = Post::where('id_user', $id)
-                ->where('type', 'photo')
-                ->orderBy('date_register', 'desc')
-                ->offset($page * $perPage)
-                ->limit($perPage)
-                ->get();
+            $postList = Post::postListPhoto($id, $page, $perPage);
         }
 
         $posts = $this->_postListToObject($postList, $this->loggedUser['id']);
@@ -428,20 +388,10 @@ class FeedController extends Controller
 
         $page = 1;
         $perPage = intval($request->input('perPage'));
-
         // Pegar as fotos do usuário ordenado pela data
-        $postList = Post::where('id_user', $id)
-            ->where('type', 'photo')
-            ->orderBy('date_register', 'desc')
-            //->offset($page * $perPage)
-            ->limit($perPage)
-            ->get();
-
-        $total = Post::where('id_user', $id)
-            ->where('type', 'photo')
-            ->count();
+        $postList = Post::postListPhotoLimit($id, $perPage);
+        $total = Post::totalPostPhoto($id);
         $pageCount = ceil($total / $perPage);
-
         // Preencher as informações adicionais
         $posts = $this->_postListToObject($postList, $id);
 

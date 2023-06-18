@@ -24,19 +24,15 @@ class MedicamentPetController extends Controller
         $id_pet = $request->input('id_pet');
         $name = $request->input('name');
         $application_date = $request->input('application_date');
-        $tipo = $request->input('tipo');
+        $type = $request->input('tipo');
         $recommendation = $request->input('recommendation');
         // CRIANDO NOVO PET
-        $newVaccineMecicament = new VaccineCard();
-        $newVaccineMecicament->id_pet = $id_pet;
-        $newVaccineMecicament->id_user = $id_user;
-        $newVaccineMecicament->name = $name;
-        $newVaccineMecicament->application_date = $application_date;
-        $newVaccineMecicament->type = $tipo;
-        $newVaccineMecicament->recommendation = $recommendation;
-        $newVaccineMecicament->date_register = date('Y-m-d H:i:s');
-        $newVaccineMecicament->save();
-        $array['success'] = 'Vacina/Medicamento cadastrado com sucesso!';
+        if(VaccineCard::createRegister($id_pet,$id_user,$name,$application_date, $type,$recommendation,date('Y-m-d H:i:s'))){
+            $array['success'] = 'Vacina/Medicamento cadastrado com sucesso!';
+        } else {
+            $array['error'] = 'Falha no cadastro de Vacina/Medicamento!';
+        };
+
         return $array;
     }
 
@@ -51,12 +47,8 @@ class MedicamentPetController extends Controller
         $array['teste1'] = $user;
         $array['teste2'] = $id_pet;
         //2 - Pegar os posts ordenado pela data
-        $List = VaccineCard::where('id_pet', $id_pet)
-            ->where('id_user', 1)
-            ->where('status', 1)
-            ->orderBy('date_register', 'desc')
-            //->offset($page * $perPage)
-            ->get();
+        $List = VaccineCard::listVaccine($id_pet);
+
 
 
         $array['listMedicaments'] = $List;

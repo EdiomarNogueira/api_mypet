@@ -97,33 +97,9 @@ class PetController extends Controller
         // }
 
         // foreach ($list_recipients as $key => $recipient) {
-        $newAlert = new Alerts();
-        $newAlert->photo = $arquive_photo;
-        $newAlert->id_pet = $id_pet;
-        $newAlert->id_user = $id_user;
-        // $newAlert->marked_users = $recipient->id;
-        $newAlert->tutor_name = $name;
-        $newAlert->description = $addText;
-        $newAlert->situation = $situation;
-        $newAlert->date_occurrence = $date_occurrence;
-        $newAlert->road = $road;
-        $newAlert->city = $city;
-        $newAlert->district = $district;
-        $newAlert->email = $email;
-        $newAlert->phone = $phone;
-        $newAlert->latitude = $lat;
-        $newAlert->longitude = $lon;
-        // $newAlert->distance = $recipient->distance;
-        $newAlert->date_register = date('Y-m-d H:i:s');
-        $newAlert->save();
-
-        $pet = Pet::find($id_pet);
-        $pet->situation = $situation;
-        $pet->date_change = date('Y-m-d H:i:s');
-        $pet->save();
-        $array['success'] = "Alerta gerado!";
-        // }
-
+        if (Alerts::createAlert($arquive_photo, $id_pet, $id_user, $name, $addText, $situation, $date_occurrence, $road, $city, $district, $email, $phone, $lat, $lon, date('Y-m-d H:i:s'))) {
+            $array['success'] = "Alerta gerado!";
+        }
 
         return $array;
     }
@@ -153,24 +129,12 @@ class PetController extends Controller
             $avatar = "cat_avatar_default.jpg";
         }
         // CRIANDO NOVO PET
-        $newPet = new Pet();
-        $newPet->name = $name;
-        $newPet->id_user = $this->loggedUser['id'];
-        $newPet->species = $species;
-        $newPet->birthdate = $birthdate;
-        $newPet->biography = $biography;
-        $newPet->genre = $genre;
-        $newPet->avatar = $avatar;
-        $newPet->size = $size;
-        $newPet->breed = $breed;
-        $newPet->fur = $fur;
-        $newPet->castrated = $castrated;
-        $newPet->situation = $situation;
-        $newPet->latitude = $latitude;
-        $newPet->longitude = $longitude;
-        $newPet->date_register = date('Y-m-d H:i:s');
-        $newPet->save();
-        $array['success'] = 'Pet cadastrado com sucesso!';
+        if (Pet::createPet($name, $this->loggedUser['id'], $species, $birthdate, $biography, $genre, $avatar, $size, $breed, $fur, $castrated, $situation, $latitude, $longitude, date('Y-m-d H:i:s'))) {
+            $array['success'] = 'Pet cadastrado com sucesso!';
+        } else {
+            $array['error'] = 'Falha no cadastro!';
+        };
+
         return $array;
     }
 
@@ -201,55 +165,11 @@ class PetController extends Controller
             $situation = $request->input('situation');
             $date_change = date('Y-m-d H:i:s');
 
-
-            $pet = Pet::find($id_pet);
-
-            if ($name) {
-                $pet->name = $name;
-            }
-
-            if ($species) {
-                $pet->species = $species;
-            }
-
-            if ($birthdate) {
-                if (strtotime($birthdate) === false) {
-                    $array['error'] = 'Data de nascimento inválida';
-                    return $array;
-                }
-                $pet->birthdate = $birthdate;
-            }
-
-            if ($biography) {
-                $pet->biography = $biography;
-            }
-
-            if ($breed) {
-                $pet->breed = $breed;
-            }
-
-            if ($genre) {
-                $pet->genre = $genre;
-            }
-
-            if ($size) {
-                $pet->size = $size;
-            }
-
-            if ($fur) {
-                $pet->fur = $fur;
-            }
-
-            if ($situation) {
-                $pet->situation = $situation;
-            }
-
-            if ($castrated) {
-                $pet->castrated = $castrated;
-            }
-            $pet->date_change = date('Y-m-d H:i:s');
-            $pet->save();
-            $array['success'] = 'Alteração no Pet efetuada com sucesso!';
+            if (Pet::updatePet($id_pet, $name, $species, $breed, $birthdate, $biography, $genre, $size, $castrated, $fur, $situation, $date_change)) {
+                $array['success'] = 'Alteração no Pet efetuada com sucesso!';
+            } else {
+                $array['error'] = 'Erro ao atualizar Pet';
+            };
         } else {
             $array['error'] = 'O usuário não possui este pet';
         }
@@ -265,9 +185,8 @@ class PetController extends Controller
         $allowedTypes = ['image/jpg', 'image/jpeg', 'image/png'];
         //VERIFICAR SE EXISTE PET DO USUÁRIO
 
-        $petUser = Pet::where('id_user', $id)
-            ->where('id', $id_pet)
-            ->count();
+        $petUser = Pet::selectCountPetUser($id, $id_pet);
+
 
         if ($petUser > 0) {
             $image = $request->file('avatar');
@@ -393,16 +312,7 @@ class PetController extends Controller
         $array['filtro'] = $filtro;
 
         $id_user =  $this->loggedUser['id'];
-        $Alerts = Alerts::selectRaw('*')
-            // ->where('marked_users', $id_user)
-            ->whereIn('situation', $filtro)
-            ->limit($perPage)
-            ->where('status', 1)
-            ->orderBy('date_occurrence', 'desc')
-            ->get();
-
-
-
+        $Alerts = Alerts::selectListAlerts($filtro, $perPage);
         foreach ($Alerts as $key => $alert) {
             switch ($Alerts[$key]->situation) {
                 case 2:
@@ -418,17 +328,14 @@ class PetController extends Controller
                     $Alerts[$key]->photo = url('media/image_alerts/treatment/' . $Alerts[$key]->photo);
                     break;
             }
-            $dados_tutor = User::selectRaw('avatar, name')
-                ->where('id', $Alerts[$key]->id_user)
-                ->where('status', 1)
-                ->first();
+            $dados_tutor = User::selectDadosTutor($Alerts[$key]->id_user);
+
             $Alerts[$key]->avatar_tutor = url('media/avatars_users/' . $dados_tutor->avatar);
             $Alerts[$key]->name_tutor = $dados_tutor->name;
             $Alerts[$key]->distance = number_format($Alerts[$key]->distance, 2, '.', '');
-            $dados_pet = Pet::selectRaw('*')
-                ->where('id', $Alerts[$key]->id_pet)
-                ->where('status', 1)
-                ->first();
+
+            $dados_pet = Pet::selectDadosPet($Alerts[$key]->id_pet);
+
             $Alerts[$key]->name_pet = $dados_pet->name;
             $Alerts[$key]->breed = $dados_pet->breed;
             $Alerts[$key]->species = $dados_pet->species;
@@ -442,18 +349,18 @@ class PetController extends Controller
                 $string_ano = '';
                 $string_mes = '';
                 $string_dia = '';
-                if($intervalo->y > 1 && $intervalo->y !=0) {
+                if ($intervalo->y > 1 && $intervalo->y != 0) {
                     $string_ano = $intervalo->y . " anos e ";
                 } else {
                     $string_ano = $intervalo->y . " ano e ";
                 }
-                if($intervalo->m > 1 && $intervalo->m !=0 ) {
+                if ($intervalo->m > 1 && $intervalo->m != 0) {
                     $string_mes = $intervalo->m . " meses";
                 } else {
                     $string_mes = $intervalo->m . " mês";
                 }
 
-                if($intervalo->y ==0 && $intervalo->m ==0) {
+                if ($intervalo->y == 0 && $intervalo->m == 0) {
                     $string_dia = $intervalo->d . " dias";
                 }
                 $Alerts[$key]->age = $string_ano .  $string_mes . $string_dia;
@@ -520,28 +427,23 @@ class PetController extends Controller
                 $string_ano = '';
                 $string_mes = '';
                 $string_dia = '';
-                if($intervalo->y > 1 && $intervalo->y !=0) {
+                if ($intervalo->y > 1 && $intervalo->y != 0) {
                     $string_ano = $intervalo->y . " anos e ";
                 } else {
                     $string_ano = $intervalo->y . " ano e ";
                 }
-                if($intervalo->m > 1 && $intervalo->m !=0 ) {
+                if ($intervalo->m > 1 && $intervalo->m != 0) {
                     $string_mes = $intervalo->m . " meses";
                 } else {
                     $string_mes = $intervalo->m . " mês";
                 }
 
-                if($intervalo->y ==0 && $intervalo->m ==0) {
+                if ($intervalo->y == 0 && $intervalo->m == 0) {
                     $string_dia = $intervalo->d . " dias";
                 }
                 $dados[0][$key]->age = $string_ano .  $string_mes . $string_dia;
 
-                $name_tutor =  User::select('name')
-                    ->where('id', $dados[0][$key]->id_user)
-                    // ->offset($page * $perPage)
-                    // ->limit($perPage)
-                    ->where('status', 1)
-                    ->first();
+                $name_tutor = User::selectName($dados[0][$key]->id_user);
                 $dados[0][$key]->tutor_name = $name_tutor->name;
             }
         }
@@ -558,10 +460,7 @@ class PetController extends Controller
         $array = ['error' => ''];
         $id_user = $this->loggedUser['id'];
         if ($id_pet == null) {
-            $id_pet = Pet::selectRaw('id')
-                ->where('id_user', $id_user)
-                ->where('status', 1)
-                ->get();
+            $id_pet = Pet::selectIdPet($id_user);
 
             if (!isset($id_pet[0])) {
                 $array['error'] = 'Este usuário não possui pets cadastrados';
@@ -577,14 +476,8 @@ class PetController extends Controller
 
         $page = intval($request->input('page'));
         $perPage = 4;
+        $dados = Pet::selectDadosUserPet($pets, $id_user);
 
-        $dados[] = Pet::select('*')
-            ->whereIn('id', $pets)
-            ->where('id_user', $id_user)
-            // ->offset($page * $perPage)
-            // ->limit($perPage)
-            ->where('status', 1)
-            ->get();
         if (count($dados) == 0) {
             $array['error'] = 'Pet não encontrado';
             return $array;
@@ -607,28 +500,22 @@ class PetController extends Controller
                 $string_ano = '';
                 $string_mes = '';
                 $string_dia = '';
-                if($intervalo->y > 1 && $intervalo->y !=0) {
+                if ($intervalo->y > 1 && $intervalo->y != 0) {
                     $string_ano = $intervalo->y . " anos e ";
                 } else {
                     $string_ano = $intervalo->y . " ano e ";
                 }
-                if($intervalo->m > 1 && $intervalo->m !=0 ) {
+                if ($intervalo->m > 1 && $intervalo->m != 0) {
                     $string_mes = $intervalo->m . " meses";
                 } else {
                     $string_mes = $intervalo->m . " mês";
                 }
 
-                if($intervalo->y ==0 && $intervalo->m ==0) {
+                if ($intervalo->y == 0 && $intervalo->m == 0) {
                     $string_dia = $intervalo->d . " dias";
                 }
                 $dados[0][$key]->age = $string_ano .  $string_mes . $string_dia;
-
-                $name_tutor =  User::select('name')
-                    ->where('id', $dados[0][$key]->id_user)
-                    // ->offset($page * $perPage)
-                    // ->limit($perPage)
-                    ->where('status', 1)
-                    ->first();
+                $name_tutor =  User::selectName($dados[0][$key]->id_user);
                 $dados[0][$key]->tutor_name = $name_tutor->name;
             }
         }

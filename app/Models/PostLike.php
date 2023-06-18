@@ -35,16 +35,20 @@ class PostLike extends Model
         return $likes;
     }
 
-    public static function selectPostLikeStatus($id_post, $id_user)
+    public static function selectPostLikeUserStatus($id_post, $id_user,$status)
     {
         $isLiked = PostLike::where('id_post', $id_post)
             ->where('id_user', $id_user)
-            ->where('status', 1)
+            ->where('status', $status)
             ->count();
         return $isLiked;
     }
 
-
+    public static function selectPostLikeStatus($id_post, $status)
+    {
+        $likes = PostLike::where('id_post', $id_post)->where('status', $status)->count();
+        return $likes;
+    }
 
     public function countLike($id)
     {

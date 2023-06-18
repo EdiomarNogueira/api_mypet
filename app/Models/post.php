@@ -18,12 +18,33 @@ class Post extends Model
         $newPost->date_register = $date;
         $newPost->body = $body;
         $newPost->marked_pets = $pets;
-        if ($newPost->type == 'photo') {
-            $newPost->subtitle = $subtitle;
-        }
+        $newPost->subtitle = $subtitle;
         $newPost->save();
     }
 
+    public static function totalPostPhoto($id_user)
+    {
+        $total = Post::where('id_user', $id_user)
+            ->where('type', 'photo')
+            ->count();
+        return $total;
+    }
+
+    public static function postListPhotoLimit($id, $perPage)
+    {
+        $postList = Post::where('id_user', $id)
+            ->where('type', 'photo')
+            ->orderBy('date_register', 'desc')
+            //->offset($page * $perPage)
+            ->limit($perPage)
+            ->get();
+        return $postList;
+    }
+    public static function countTotalPosts($id)
+    {
+        $total = Post::where('id_user', $id)->count();
+        return $total;
+    }
     public static function selectPost($id_user, $id_delete)
     {
         $post = Post::select('*')
@@ -32,6 +53,39 @@ class Post extends Model
             ->where('status', 1)
             ->first();
         return $post;
+    }
+
+    public static function postListPhotoMarkedPet($id, $id_pet, $perPage)
+    {
+        $postList = Post::where('id_user', $id)
+            ->where('type', 'photo')
+            ->whereJsonContains('marked_pets', $id_pet)
+            ->orderBy('date_register', 'desc')
+            //->offset($page * $perPage)
+            ->limit($perPage)
+            ->get();
+        return $postList;
+    }
+
+    public static function postListPhoto($id, $page, $perPage)
+    {
+        $postList = Post::where('id_user', $id)
+            ->where('type', 'photo')
+            ->orderBy('date_register', 'desc')
+            ->offset($page * $perPage)
+            ->limit($perPage)
+            ->get();
+        return $postList;
+    }
+    public static function selectPostList($id, $page, $perPage)
+    {
+        $postList = Post::where('id_user', $id)
+            ->orderBy('date_register', 'desc')
+            ->offset($page * $perPage)
+            ->limit($perPage)
+            ->get();
+
+        return $postList;
     }
 
     public static function postList($users, $perPage)
